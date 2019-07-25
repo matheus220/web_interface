@@ -1,0 +1,49 @@
+.btn, input {
+    line-height: 2em;
+    border-radius: 3px;
+    border: 0;
+    display: inline-block;
+    margin: 10px 0;
+    padding: 0.2em 1em;
+    font-size: 1em;
+}
+
+input[type='text'] {
+    border: 1px solid #ddd; 
+    min-width: 100%;
+}
+
+input:focus {
+    outline: none;
+    border: 1px solid #a3b1ff;
+}
+
+.btn {
+    text-align: center;
+    font-weight: bold; 
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.li-list {
+    display: flex;
+    border-radius: 3px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 7px;
+    background-color: #dee2eb;
+}
+
+.li-list:hover {
+    background-color: #cdcdcd;
+}
+
+.text {
+    padding: 0.5em 0.7em;
+}
