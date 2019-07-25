@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ROSLIB from 'roslib';
 import { Map, ImageOverlay, Marker, Popup, Polyline } from "react-leaflet";
 import L from 'leaflet';
 
@@ -42,11 +43,42 @@ export default class MapWaypoints extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {polyline : []};
-        this.robot_pose = [9.0, 39.0, 0.0]
+        this.state = {
+            polyline: [],
+            robot_pose: [9999999.9, 9999999.9, 9999999.9]
+        };
 
         this._onMapClick = this._onMapClick.bind(this);
         this._onMarkerClick = this._onMarkerClick.bind(this);
+        this._pose_callback = this._pose_callback.bind(this);
+
+        let robot_IP = "192.168.1.96";
+
+        let ros = new ROSLIB.Ros({
+            url: "ws://" + robot_IP + ":9090"
+        });
+
+        let poseListener = new ROSLIB.Topic({
+            ros : ros,
+            name : '/robot_pose',
+            messageType : 'geometry_msgs/Pose',
+            throttle_rate : 100
+        });
+
+        poseListener.subscribe(this._pose_callback);
+    }
+
+    _pose_callback (pose) {
+        if ((pose.position.x).toFixed(1) !== this.state.robot_pose[0] || (pose.position.y).toFixed(1) !== this.state.robot_pose[1] || 0.0 !== this.state.robot_pose[2]) {
+            console.log("entrou");
+            this.setState({
+                robot_pose: [
+                    (pose.position.x).toFixed(1),
+                    (pose.position.y).toFixed(1),
+                    0.0
+                ]
+            });
+        }
     }
 
     _onMapClick(e) {
@@ -66,9 +98,10 @@ export default class MapWaypoints extends Component {
     }
 
     render() {
+        let show_robot_pose = this.state.robot_pose !== [9999999.9, 9999999.9, 9999999.9] && this.props.robotPose
         return (
             <div>
-                <Map onClick={this._onMapClick} crs={L.CRS.Simple} zoomDelta={0.2} zoomSnap={0} minZoom={-2.15} maxZoom={1} bounds={bounds} style={{ height: this.props.height ? this.props.height : "80vh", width: "100%", backgroundColor: "#cdcdcd" }}>
+                <Map onClick={this._onMapClick} crs={L.CRS.Simple} zoomDelta={0.3} zoomSnap={0} minZoom={-2.15} maxZoom={2} bounds={bounds} style={{ height: this.props.height ? this.props.height : "80vh", width: "100%", backgroundColor: "#cdcdcd" }}>
                     <ImageOverlay
                         bounds={bounds}
                         url={map}
@@ -80,8 +113,8 @@ export default class MapWaypoints extends Component {
                             </Popup> : null}
                         </Marker>
                     )}
-                    {this.props.robotPose ? 
-                        <Marker icon={robotPoseIcon} position={[this.robot_pose[1]/0.05, this.robot_pose[0]/0.05]}/> 
+                    {show_robot_pose ? 
+                        <Marker icon={robotPoseIcon} position={[this.state.robot_pose[1]/0.05, this.state.robot_pose[0]/0.05]}/> 
                     : null}
                     {this.props.showPath ? <Polyline color="red" weight={3} opacity={0.8} lineJoin="round" positions={this.pointList(this.props.waypoints)} /> : null}
                 </Map>

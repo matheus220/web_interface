@@ -4,19 +4,21 @@ import MapWaypoints from "./map.component";
 import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
 import "react-image-gallery/styles/css/image-gallery.css";
-
+//http://192.168.1.96:8080/stream?topic=/usb_cam/image_raw&type=mjpeg&quality=50
+//http://lorempixel.com/1000/600/nature/1/
 export default class Navigation extends Component {
     constructor(props) {
         super(props);
         this.defaultImages = [
-            { original: 'http://lorempixel.com/1000/600/nature/1/' },
-            { original: 'http://lorempixel.com/1000/600/nature/2/' },
-            { original: 'http://lorempixel.com/1000/600/nature/3/' }
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=20' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=20' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=20' }
         ]
 
         this.state = {
             logmission: {},
             map_waypoints: [],
+            logs: [],
             images: this.defaultImages
         };
 
@@ -43,7 +45,11 @@ export default class Navigation extends Component {
                             waypoint.icon = 2;
                             break;
                         }
-                        waypoint.images = traveled_waypoints[index].input;
+                        waypoint.images = traveled_waypoints[index].input.items.filter(item => {
+                            return(item.model == "Camera")
+                        }).map(item => {
+                            return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": traveled_waypoints[index].input.timestamp});
+                        });
                     }
                 })
                 console.log(mission_waypoints);
@@ -52,13 +58,25 @@ export default class Navigation extends Component {
             .catch(function (error){
                 console.log(error);
             })
+        axios.get('http://localhost:4000/log/')
+            .then(response => {
+                this.setState({ logs: response.data});
+                console.log(response.data);
+            })
+            .catch(function (error){
+                console.log(error);
+            })
+    }
+
+    componentDidUpdate(){
+        console.log("Update");
     }
 
     onMarkerClick(e) {
         let waypoint = this.state.map_waypoints.find(wp => wp._id === e.target.options.id);
         if( waypoint.hasOwnProperty('images') ) {
             let images = waypoint.images.map(img => {
-                return {original: img};
+                return {original: "/images/" + img.image_name};
             });
             this.setState({
                 images: images
@@ -68,6 +86,25 @@ export default class Navigation extends Component {
     }
 
     render() {
+
+        let logs = this.state.logs.map(mission => {
+            return (
+                <div className="row p-t-20 p-b-30">
+                    <div className="col-auto text-right update-meta p-r-0">
+                        <i className="b-primary update-icon ring"></i>
+                    </div>
+                    <div className="col p-l-5" style={{width: "100%"}}>
+                        <h6>[{mission.levelname}] {mission.date}</h6>
+                        <p className="text-muted m-b-0">
+                            {mission.message}
+                        </p>
+                    </div>
+                </div>
+            );
+        });
+
+        console.log(this.poseListener);
+
         return (
             <div class="row">
                 <div class="col-md-12 col-xl-6">
@@ -94,7 +131,7 @@ export default class Navigation extends Component {
                             </div>
                         </div>
                         <div className="card-block" style={{paddingTop: "5px"}}>
-                            <ImageGallery items={this.state.images} showThumbnails={false} showPlayButton={false} showBullets={true}/>
+                            <ImageGallery defaultImage={"/error.jpg"} items={this.state.images} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
                     <div className="card" style={{marginTop: "20px"}}>
@@ -104,17 +141,7 @@ export default class Navigation extends Component {
                         <div className="card-block" style={{paddingTop: "0px"}}>
                             <Scrollbars autoHide style={{ width: "100%", height: "300px" }}>
                                 <div className="latest-update-box">
-                                    <div className="row p-t-20 p-b-30">
-                                        <div className="col-auto text-right update-meta p-r-0">
-                                            <i className="b-primary update-icon ring"></i>
-                                        </div>
-                                        <div className="col p-l-5">
-                                            <h6>[INFO] 25-07-2019 10:06 PM</h6>
-                                            <p className="text-muted m-b-0">
-                                                Message
-                                            </p>
-                                        </div>
-                                    </div>
+                                    {logs}
                                 </div>
                             </Scrollbars>
                         </div>

@@ -6,18 +6,19 @@ const mongoose = require('mongoose');
 const waypointRoutes = express.Router();
 const missionRoutes = express.Router();
 const logmissionRoutes = express.Router();
+const logRoutes = express.Router();
 const PORT = 4000;
-
 
 let Models = require('./mongo.model');
 let Waypoint = Models.Waypoint;
 let Mission = Models.Mission;
 let LogMission = Models.LogMission;
+let Log = Models.Log;
 
 app.use(cors());
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/todos', { useNewUrlParser: true });
+mongoose.connect('mongodb://127.0.0.1:27017/robotic', { useNewUrlParser: true });
 const connection = mongoose.connection;
 
 connection.once('open', function() {
@@ -141,17 +142,36 @@ missionRoutes.route('/delete/:id').post(function(req, res) {
 app.use('/mission', missionRoutes);
 
 logmissionRoutes.route('/').get(function(req, res) {
-    LogMission.findOne(function(err, logmission) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(logmission);
+    LogMission.findOne(
+        { mode: 'patrol' },
+        function(err, logmission) {
+            if (err) {
+                console.log(err);
+            } else {
+                res.json(logmission);
         }
-    }).populate({ path: 'mission_id', populate: { path: 'path' } })
-    .populate('data.waypoint');
+    })
+    .sort('-start_time')
+    .populate({ path: 'mission_id', populate: { path: 'path' } })
+    .populate('data.waypoint')
+    .populate({ path: 'data.input', populate: { path: 'items.item' } });
 });
 
 app.use('/logmission', logmissionRoutes);
+
+logRoutes.route('/').get(function(req, res) {
+    Log.find(
+        function(err, log) {
+            if (err) {
+                console.log(err);
+            } else {
+                res.json(log);
+            }
+        }
+    ).sort({ date: 'descending' });
+});
+
+app.use('/log', logRoutes);
 
 app.listen(PORT, function() {
     console.log("Server is running on Port: " + PORT);
