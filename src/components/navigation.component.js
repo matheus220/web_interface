@@ -13,9 +13,9 @@ export default class Navigation extends Component {
     constructor(props) {
         super(props);
         this.defaultImages = [
-            { original: '/image1.jpg' },
-            { original: '/image2.jpg' },
-            { original: '/image3.jpg' }
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=20' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=20' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=20' }
         ]
         this.defaultCameras = ['camera1', 'camera2', 'camera3']
 
@@ -40,13 +40,15 @@ export default class Navigation extends Component {
             current_index: 0,
             timestamp: [],
             real_time: true,
-            currentMode: 0
+            currentMode: 0,
+            battery: -1
         };
 
         this.onMarkerClick = this.onMarkerClick.bind(this);
         this.toggleRealTime = this.toggleRealTime.bind(this);
         this.onSlide = this.onSlide.bind(this);
         this._mode_callback = this._mode_callback.bind(this);
+        this._battery_callback = this._battery_callback.bind(this);
         
         let robot_IP = "192.168.1.96";
 
@@ -57,51 +59,68 @@ export default class Navigation extends Component {
         let currentModeListener = new ROSLIB.Topic({
             ros : ros,
             name : '/current_mode',
-            messageType : 'Int8',
-            throttle_rate : 100
+            messageType : 'std_msgs/Int8',
+            throttle_rate : 1
+        });
+
+        let batteryListener = new ROSLIB.Topic({
+            ros : ros,
+            name : '/npb/power_info',
+            messageType : 'npb/MsgPowerInfo',
+            throttle_rate : 1
         });
 
         currentModeListener.subscribe(this._mode_callback);
+        batteryListener.subscribe(this._battery_callback);
     }
 
     _mode_callback (currentMode) {
-        if (currentMode !== this.state.currentMode) {
+        if (currentMode.data !== this.state.currentMode) {
             this.setState({
-                currentMode: currentMode
+                currentMode: currentMode.data
             });
         }
     }
-    
+
+    _battery_callback (level) {
+        if (level.batt_soc !== this.state.battery) {
+            this.setState({
+                battery: level.batt_soc
+            });
+        }
+    }
+
     componentDidMount() {
         axios.get('http://localhost:4000/logmission/')
             .then(response => {
-                if(response.data.hasOwnProperty('mode')) {
-                    let mission_waypoints = response.data.mission_id.path;
-                    let traveled_waypoints = response.data.data;
-                    mission_waypoints.map(waypoint => {
-                        let index = traveled_waypoints.findIndex(measure => measure.waypoint._id === waypoint._id);
-                        waypoint.icon = 0;
-                        if (index !== -1) {
-                            switch (traveled_waypoints[index].status) {
-                            case 'succeeded':
-                                waypoint.icon = 1;
-                                break;
-                            case 'active':
-                                waypoint.icon = 3;
-                                break;
-                            case 'aborted':
-                                waypoint.icon = 2;
-                                break;
-                            }
+                let mission_waypoints = response.data.mission_id.path;
+                let traveled_waypoints = response.data.data;
+                mission_waypoints.map(waypoint => {
+                    let index = traveled_waypoints.findIndex(measure => measure.waypoint._id === waypoint._id);
+                    waypoint.icon = 0;
+                    if (index !== -1) {
+                        switch (traveled_waypoints[index].status) {
+                        case 'succeeded':
+                            waypoint.icon = 1;
+                            break;
+                        case 'active':
+                            waypoint.icon = 3;
+                            break;
+                        case 'aborted':
+                            waypoint.icon = 2;
+                            break;
+                        }
+                        if(traveled_waypoints[index].hasOwnProperty('input')) {
                             waypoint.images = traveled_waypoints[index].input.items.filter(item => {
                                 return(item.model === "Camera")
                             }).map(item => {
                                 return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": traveled_waypoints[index].input.timestamp});
                             });
                         }
-                    })
-                    this.setState({ logmission: response.data, map_waypoints: mission_waypoints });
-                }
+                        return(waypoint);
+                    }
+                })
+                this.setState({ logmission: response.data, map_waypoints: mission_waypoints });
             })
             .catch(function (error){
                 console.log(error);
@@ -109,7 +128,6 @@ export default class Navigation extends Component {
         axios.get('http://localhost:4000/log/')
             .then(response => {
                 this.setState({ logs: response.data});
-                console.log(response.data);
             })
             .catch(function (error){
                 console.log(error);
@@ -117,7 +135,15 @@ export default class Navigation extends Component {
     }
 
     componentDidUpdate(){
-        console.log("Update");
+        axios.get('http://localhost:4000/log/')
+            .then(response => {
+                if(response.data.length !== this.state.logs.length) {
+                    this.setState({ logs: response.data});
+                }
+            })
+            .catch(function (error){
+                console.log(error);
+            })
     }
 
     onMarkerClick(e) {
@@ -134,7 +160,7 @@ export default class Navigation extends Component {
                 return date.toLocaleString();
             });
             this.setState({
-                real_time: !this.state.real_time,
+                real_time: false,
                 images: images,
                 cameras: cameras,
                 timestamp: timestamp,
@@ -145,7 +171,7 @@ export default class Navigation extends Component {
 
     toggleRealTime() {
         this.setState({
-            real_time: !this.state.real_time,
+            real_time: true,
             images: this.defaultImages,
             cameras: this.defaultCameras,
             timestamp: [],
@@ -180,8 +206,7 @@ export default class Navigation extends Component {
             );
         });
 
-        let has_mission = this.state.logmission.hasOwnProperty('mode');
-        console.log("TEST", this.state.logmission);
+        let has_mission = this.state.map_waypoints !== [];
         let mission_time_info = "";
         let title = "";
         if (has_mission) {
@@ -195,11 +220,18 @@ export default class Navigation extends Component {
                 title = "Current mission";
             }
         }
+
+        let critical_battery = this.state.battery < 30;
         
         return (
             <div class="row">
                 <div className="currentState">
                     <button type="button" class="btn btn-light">{this.modeMapping[this.state.currentMode]}</button>
+                    {critical_battery ? 
+                        <button type="button" class="btn btn-danger">{this.state.battery}%</button> :
+                        <button type="button" class="btn btn-success">{this.state.battery}%</button>
+                    }
+                    
                 </div>
                 <div class="col-md-12 col-xl-6">
                     <div className="card">
@@ -216,7 +248,7 @@ export default class Navigation extends Component {
                         </div>
                         }
                         <div className="card-block" style={{paddingTop: "5px"}}>
-                            <MapWaypoints waypoints={this.state.map_waypoints} robotPose={true} onMarkerClick={this.onMarkerClick} showPath={true} height={"102.5vh"}/>
+                            <MapWaypoints waypoints={this.state.map_waypoints} robotPose={true} onMarkerClick={this.onMarkerClick} showPath={true} height={"80.9vh"}/>
                         </div>
                     </div>
                 </div>
@@ -238,7 +270,7 @@ export default class Navigation extends Component {
                         </div>
                         }
                         <div className="card-block" style={{paddingTop: "5px"}}>
-                            <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} showThumbnails={false} showPlayButton={false} showBullets={true}/>
+                            <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} lazyLoad={false} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
                     <div className="card latest-update-card" style={{marginTop: "20px"}}>
@@ -246,7 +278,7 @@ export default class Navigation extends Component {
                             <h5>Latest Activity</h5>
                         </div>
                         <div className="card-block" style={{paddingTop: "0px"}}>
-                            <Scrollbars autoHide style={{ width: "auto", height: "260px" }}>
+                            <Scrollbars autoHide style={{ width: "auto", height: "220px" }}>
                                 <div className="latest-update-box">
                                     {logs}
                                 </div>

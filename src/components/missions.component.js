@@ -54,7 +54,7 @@ export default class Missions extends Component {
                 this.setState({
                     missions: this.state.missions.filter(mission => mission._id !== id)
                 });
-                if(this.state.selected_mission._id == id) {
+                if(this.state.selected_mission._id === id) {
                     this.setState({
                         selected_mission: { id: '', name: '', path: [] }
                     });
@@ -66,7 +66,7 @@ export default class Missions extends Component {
     }
 
     select(e) {
-        if(this.state.selected_mission._id == e._id) {
+        if(this.state.selected_mission._id === e._id) {
             this.setState({
                 selected_mission: { _id: '', name: '', path: [] }
             });
@@ -91,7 +91,7 @@ export default class Missions extends Component {
         let filtered_sorted = filtered.sort((m1, m2) => (m1.name > m2.name) ? 1 : -1);
 
         let missions = filtered.map(mission =>
-            <List key={mission._id} item={mission} selected={this.state.selected_mission._id == mission._id ? true : false} onItemClick={this.deleteItem} onItemClick2={this.select} />
+            <List key={mission._id} item={mission} selected={this.state.selected_mission._id === mission._id ? true : false} onItemClick={this.deleteItem} onItemClick2={this.select} />
         );
 
         return (

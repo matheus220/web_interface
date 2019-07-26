@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const fs = require('fs');
+const cronstrue = require('cronstrue');
+const exec = require('child_process').exec;
+const parser = require('cron-parser');
 const waypointRoutes = express.Router();
 const missionRoutes = express.Router();
 const logmissionRoutes = express.Router();
@@ -11,7 +14,7 @@ const logRoutes = express.Router();
 const scheduleRoutes = express.Router();
 const PORT = 4000;
 
-let filePath = "C:\\Users\\mathe\\Desktop\\text.txt";
+let filePath = "/tmp/crontabFile.txt";
 let Models = require('./mongo.model');
 let Waypoint = Models.Waypoint;
 let Mission = Models.Mission;
@@ -173,24 +176,59 @@ logRoutes.route('/').get(function(req, res) {
                 res.json(log);
             }
         }
-    ).sort({ date: 'descending' });
+    ).sort({ date: 'descending' })
+    .limit(10);
 });
 
 app.use('/log', logRoutes);
 
+function createRosPubCommand(task_id, cron_expression, mission_id) {
+    return("# " + task_id + "\n" + cron_expression  + " source /opt/ros/kinetic/setup.bash && rostopic pub -1 /change_mode std_msgs/String \"data: '{\\\"timestamp\\\": \\\"$(date +\"\\%d\\%m\\%Y\\%H\\%M\\%S\\%3N\")\\\", \\\"mode\\\": \\\"patrol\\\", \\\"scheduled\\\": \\\"true\\\", \\\"mission_id\\\": \\\"" + mission_id + "\\\"}'\"\n");
+}
+
 function updateFile(){
-    Task.find(
-        function(err, tasks) {
+    Task.find(function(err, tasks) {
             if (err) {
                 console.log(err);
             } else {
-                let toWrite = tasks.map(task => {
-                    return ("#" + task._id + "\n" + task.cron_expression + " rostopic pub -1 /change_mode '" + task.mission + "'\n");
+                console.log(tasks)
+                let message = "########## DO NOT WRITE BELOW THIS LINE ##########";
+                let setup = [message + "\n\nSHELL=/bin/bash\n"];
+                let taskList = tasks.map(task => {
+                    return (createRosPubCommand(task._id, task.cron_expression, task.mission_id));
                 });
-                
-                fs.writeFile(filePath, toWrite.join("\n"),  (err) => {
+                let toWrite = setup.concat(taskList);
+
+                console.log(toWrite);
+
+                exec("crontab -l > /tmp/crontab_tmp_copy.txt", function(err, stdout, stderr) {
                     if (err) throw err;
-                    console.log('Lyric saved!');
+                    console.log('Crontab copied!');
+                });
+
+                fs.readFile('/tmp/crontab_tmp_copy.txt', {encoding: 'utf-8'}, function(err, data) {
+                    if (err) throw error;
+                
+                    let dataArray = data.split('\n'); // convert file data in an array
+                    const searchLine = message; // we are looking for a line, contains, key word 'user1' in the file
+                    let index = dataArray.indexOf(searchLine);
+
+                    if(index !== -1) {
+                        dataArray.splice(index);
+                    }
+
+                    const updatedData = dataArray.concat(toWrite);
+                    
+                    fs.writeFile(filePath, updatedData.join("\n"), (err) => {
+                        if (err) throw err;
+                        console.log ('Successfully updated the file data');
+                    });
+
+                    exec("crontab " + filePath, function(err, stdout, stderr) {
+                        if (err) throw err;
+                        console.log('Crontab updated!');
+                    });
+                
                 });
             }
         }
@@ -198,15 +236,22 @@ function updateFile(){
 }
 
 scheduleRoutes.route('/').get(function(req, res) {
-    Task.find(
+    Task.find().sort({ date: 'descending' }).lean().exec(
         function(err, tasks) {
             if (err) {
                 console.log(err);
             } else {
-                res.json(tasks);
+                var t = tasks.map(task => {
+                    var interval = parser.parseExpression(task.cron_expression);
+                    task['human_readable'] = cronstrue.toString(task.cron_expression);
+                    task['next'] = interval.next();
+                    return(task);
+                });
+                res.json(t);
             }
         }
-    ).sort({ date: 'descending' });
+    );
+    //updateFile();
 });
 
 scheduleRoutes.route('/add').post(function(req, res) {
@@ -214,11 +259,11 @@ scheduleRoutes.route('/add').post(function(req, res) {
     task.save()
         .then(t => {
             res.status(200).json({'task': 'task added successfully'});
-            updateFile()
         })
         .catch(err => {
             res.status(400).send('adding new task failed');
         });
+    updateFile();
 });
 
 scheduleRoutes.route('/delete/:id').post(function(req, res) {
@@ -227,9 +272,9 @@ scheduleRoutes.route('/delete/:id').post(function(req, res) {
             res.send(err);
         } else {
             res.json({ message: 'Task Deleted!'});
-            updateFile();
         }
     });
+    updateFile();
 });
 
 app.use('/task', scheduleRoutes);

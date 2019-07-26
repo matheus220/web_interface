@@ -119,18 +119,20 @@ let Log = new Schema({
 }, { collection: 'log' });
 
 let Task = new Schema({
-    mission: {
-        type: Schema.Types.ObjectId,
-        ref: 'Mission'
+    mission_id: {
+        type: String
+    },
+    mission_name: {
+        type: String
     },
     cron_expression: {
         type: String
     },
-    human_readable: {
-        type: String
-    },
     date: {
         type: Date
+    },
+    active: {
+        type: Boolean
     }
 }, { collection: 'task' });
 

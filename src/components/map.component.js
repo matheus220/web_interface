@@ -60,23 +60,20 @@ export default class MapWaypoints extends Component {
 
         let poseListener = new ROSLIB.Topic({
             ros : ros,
-            name : '/robot_pose',
-            messageType : 'geometry_msgs/Pose',
-            throttle_rate : 100
+            name : '/amcl_pose',
+            messageType : 'geometry_msgs/PoseWithCovarianceStamped',
+            throttle_rate : 1
         });
 
         poseListener.subscribe(this._pose_callback);
     }
 
-    _pose_callback (pose) {
-        if ((pose.position.x).toFixed(1) !== this.state.robot_pose[0] || (pose.position.y).toFixed(1) !== this.state.robot_pose[1] || 0.0 !== this.state.robot_pose[2]) {
-            console.log("entrou");
+    _pose_callback (msg) {
+        let x = (msg.pose.pose.position.x).toFixed(1);
+        let y = (msg.pose.pose.position.y).toFixed(1);;
+        if (x !== this.state.robot_pose[0] || y !== this.state.robot_pose[1] || 0.0 !== this.state.robot_pose[2]) {
             this.setState({
-                robot_pose: [
-                    (pose.position.x).toFixed(1),
-                    (pose.position.y).toFixed(1),
-                    0.0
-                ]
+                robot_pose: [ x, y, 0.0 ]
             });
         }
     }
