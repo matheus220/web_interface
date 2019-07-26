@@ -96,6 +96,39 @@ code {
   text-align: right;
 }
 
+.caption-text {
+  padding: 0px 0;
+  color: #7e7e7e;
+  font-size: 0.7em;
+  left: 1.25rem;
+  top: 41px;
+  position: absolute;
+}
+
+.currentState {
+  color: #fff;
+  font-size: 1.2em;
+  right: 3.0rem;
+  top: 0px;
+  position: absolute;
+}
+
+.currentState button {
+  line-height: 1.5em;
+  border-radius: 10px;
+}
+
+.card-header-left-text {
+  left: 1.25rem;
+  top: 7px;
+  display: inline-block;
+  position: absolute;
+  float: left;
+  padding: 7px 0;
+  font-size: 0.8em;
+  text-align: left;
+}
+
 .buttons-group {
   margin-top: 1rem;
 }
@@ -113,76 +146,153 @@ code {
   background-color: #cdcdcd;
 }
 
-.latest-update-card .card-block .latest-update-box {
-  position: relative;
+.p-b-15 {
+  padding-bottom: 15px;
 }
 
-.latest-update-card .card-block .latest-update-box:after {
-  content: "";
-  position: absolute;
-  background: #ebebeb;
-  height: 100%;
-  width: 3px;
-  top: 0;
-  left: 19px;
-  z-index: 1;
-}
-
-.p-b-30 {
-  padding-bottom: 30px;
-}
-
-.p-t-20 {
-  padding-top: 20px;
-}
-
-.latest-update-card .card-block .latest-update-box .update-meta {
-  z-index: 2;
+.p-t-15 {
+  padding-top: 15px;
 }
 
 .p-r-0 {
   padding-right: 0;
 }
 
-.text-right {
-  text-align: right!important;
+.p-l-5 {
+  padding-left: 5px;
 }
 
-.latest-update-card .card-block .latest-update-box .update-meta .update-icon.ring {
-  border-width: 3px;
-  width: 15px;
-  height: 15px;
-  padding: 0;
-  display: block;
-  margin-left: 13px;
-  background: #fff;
+.m-b-0 {
+  margin-bottom: 0;
 }
 
-.latest-update-card .card-block .latest-update-box .update-meta i.update-icon {
-  margin-left: 4px;
-  margin-right: 19px;
+.card .card-block p {
+  line-height: 1.4;
 }
 
-.latest-update-card .card-block .latest-update-box .update-meta .update-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  text-align: center;
-  padding: 7px 8px;
-  font-size: 16px;
-  color: #fff;
+.b-info {
+  border: 1px solid #4099ff;
 }
 
-.b-primary {
-  border: 1px solid #3e98ff;
+.b-success{
+  border:1px solid #2ed8b6;
 }
 
-.update-icon.ring{
-  border-width:3px;
-  width:15px;
-  height:15px;
+.b-default{
+  border:1px solid #d6d6d6;
+}
+
+.b-warning{
+  border:1px solid #ffb64d;
+}
+
+.b-error{
+  border:1px solid #37474f;
+}
+
+.b-primary{
+  border:1px solid #00bcd4;
+}
+
+.b-critical{
+  border:1px solid #ff5370;
+}
+
+.t-info {
+  color: #4099ff;
+}
+
+.t-success{
+  color: #2ed8b6;
+}
+
+.t-default{
+  color: #d6d6d6;
+}
+
+.t-warning{
+  color: #ffb64d;
+}
+
+.t-error{
+  color: #37474f;
+}
+
+.t-primary{
+  color: #00bcd4;
+}
+
+.t-critical{
+  color: #ff5370;
+}
+
+.latest-update-card .card-block{
+  padding-top:0;
+}
+
+.latest-update-card .card-block .latest-update-box{
+  position:relative;
+}
+
+.latest-update-card .card-block .latest-update-box:after{
+  content:"";
+  position:absolute;
+  background:#ebebeb;
+  height:100%;
+  width:3px;
+  top:0;
+  left:19px;
+  z-index:1;
+}
+
+.latest-update-card .card-block .latest-update-box .update-meta{
+  z-index:2;
+}
+
+.latest-update-card .card-block .latest-update-box .update-meta .update-icon{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  text-align:center;
+  padding:7px 8px;
+  font-size:16px;
+  color:#fff;
+}
+
+.latest-update-card .card-block .latest-update-box .update-meta .update-icon.ring{
+  border-width:3.5px;
+  width:17px;
+  height:17px;
   padding:0;
   display:block;
-  margin-left:13px;
-  background:#fff
+  margin-left: 12px;
+  margin-top: 5px;
+  background:#fff;
 }
+
+.latest-update-card .card-block .latest-update-box .update-meta i.update-icon{
+  margin-left:4px;
+  margin-right:19px;
+}
+
+.latest-update-card .card-block .latest-update-box .update-meta img.update-icon{
+  padding:0;
+  width:40px;
+  height:40px
+}@media only screen and (max-width:575px){
+  .latest-update-card .card-block .latest-update-box:after{
+    display:none;
+  }
+
+  .latest-update-card .card-block .latest-update-box .update-meta{
+    z-index:2;
+    min-width:100%;
+    text-align:left!important;
+    margin-bottom:15px;
+    border-top:1px solid #f1f1f1;
+    padding-top:15px;
+  }
+}
+
+
+

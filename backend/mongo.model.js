@@ -104,7 +104,7 @@ let LogMission = new Schema({
 }, { collection: 'logmission' });
 
 let Log = new Schema({
-    data: {
+    date: {
         type: Date
     },
     levelno: {
@@ -118,6 +118,22 @@ let Log = new Schema({
     }
 }, { collection: 'log' });
 
+let Task = new Schema({
+    mission: {
+        type: Schema.Types.ObjectId,
+        ref: 'Mission'
+    },
+    cron_expression: {
+        type: String
+    },
+    human_readable: {
+        type: String
+    },
+    date: {
+        type: Date
+    }
+}, { collection: 'task' });
+
 module.exports.Waypoint = mongoose.model('Waypoint', Waypoint);
 module.exports.Mission = mongoose.model('Mission', Mission);
 module.exports.LogMission = mongoose.model('LogMission', LogMission);
@@ -125,3 +141,4 @@ module.exports.Log = mongoose.model('Log', Log);
 module.exports.Input = mongoose.model('Input', Input);
 module.exports.Camera = mongoose.model('Camera', Camera);
 module.exports.Robot = mongoose.model('Robot', Robot);
+module.exports.Task = mongoose.model('Task', Task);

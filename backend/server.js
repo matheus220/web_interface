@@ -3,17 +3,22 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const fs = require('fs');
 const waypointRoutes = express.Router();
 const missionRoutes = express.Router();
 const logmissionRoutes = express.Router();
 const logRoutes = express.Router();
+const scheduleRoutes = express.Router();
 const PORT = 4000;
 
+let filePath = "C:\\Users\\mathe\\Desktop\\text.txt";
 let Models = require('./mongo.model');
 let Waypoint = Models.Waypoint;
 let Mission = Models.Mission;
 let LogMission = Models.LogMission;
 let Log = Models.Log;
+let Task = Models.Task;
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -172,6 +177,62 @@ logRoutes.route('/').get(function(req, res) {
 });
 
 app.use('/log', logRoutes);
+
+function updateFile(){
+    Task.find(
+        function(err, tasks) {
+            if (err) {
+                console.log(err);
+            } else {
+                let toWrite = tasks.map(task => {
+                    return ("#" + task._id + "\n" + task.cron_expression + " rostopic pub -1 /change_mode '" + task.mission + "'\n");
+                });
+                
+                fs.writeFile(filePath, toWrite.join("\n"),  (err) => {
+                    if (err) throw err;
+                    console.log('Lyric saved!');
+                });
+            }
+        }
+    ).sort({ date: 'descending' });
+}
+
+scheduleRoutes.route('/').get(function(req, res) {
+    Task.find(
+        function(err, tasks) {
+            if (err) {
+                console.log(err);
+            } else {
+                res.json(tasks);
+            }
+        }
+    ).sort({ date: 'descending' });
+});
+
+scheduleRoutes.route('/add').post(function(req, res) {
+    let task = new Task(req.body);
+    task.save()
+        .then(t => {
+            res.status(200).json({'task': 'task added successfully'});
+            updateFile()
+        })
+        .catch(err => {
+            res.status(400).send('adding new task failed');
+        });
+});
+
+scheduleRoutes.route('/delete/:id').post(function(req, res) {
+    Task.findByIdAndRemove(req.params.id, function(err) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.json({ message: 'Task Deleted!'});
+            updateFile();
+        }
+    });
+});
+
+app.use('/task', scheduleRoutes);
 
 app.listen(PORT, function() {
     console.log("Server is running on Port: " + PORT);

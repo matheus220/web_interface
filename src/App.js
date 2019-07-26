@@ -3,14 +3,13 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import CreateTodo from "./components/create-todo.component";
 import EditTodo from "./components/edit-todo.component";
-import TodosList from "./components/todos-list.component";
 import Waypoints from "./components/waypoints.component";
 import Missions from "./components/missions.component";
 import Navigation from "./components/navigation.component";
 import CreateWaypoint from "./components/create-waypoint.component";
 import CreateMission from "./components/create-mission.component";
+import Schedule from "./components/schedule.component";
 
 import logo from "./logo.png";
 
@@ -27,19 +26,16 @@ export default class App extends Component {
             <div className="collpase navbar-collapse">
               <ul className="navbar-nav mr-auto">
                 <li className="navbar-item">
-                  <Link to="/" className="nav-link">Todos</Link>
-                </li>
-                <li className="navbar-item">
-                  <Link to="/create" className="nav-link">Create Todo</Link>
-                </li>
-                <li className="navbar-item">
-                  <Link to="/navigation" className="nav-link">Navigation</Link>
+                  <Link to="/" className="nav-link">Navigation</Link>
                 </li>
                 <li className="navbar-item">
                   <Link to="/waypoints" className="nav-link">Waypoints</Link>
                 </li>
                 <li className="navbar-item">
                   <Link to="/missions" className="nav-link">Missions</Link>
+                </li>
+                <li className="navbar-item">
+                  <Link to="/schedule" className="nav-link">Schedule</Link>
                 </li>
               </ul>
             </div>
@@ -49,14 +45,13 @@ export default class App extends Component {
               <div className="page-wrapper">
                 <div className="page-body">
                   <Switch>
-                    <Route path="/" exact component={TodosList} />
+                    <Route path="/" exact component={Navigation} />
                     <Route path="/edit/:id" component={EditTodo} />
-                    <Route path="/create" component={CreateTodo} />
                     <Route path="/waypoints" component={Waypoints} />
                     <Route path="/create_waypoint" component={CreateWaypoint} />
                     <Route path="/missions" component={Missions} />
                     <Route path="/create_mission" component={CreateMission} />
-                    <Route path="/navigation" component={Navigation} />
+                    <Route path="/schedule" component={Schedule} />
                   </Switch>
                 </div>
               </div>
