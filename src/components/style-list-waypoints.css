@@ -1,4 +1,4 @@
-.btn, input {
+.listItems .btn, input {
     line-height: 2em;
     border-radius: 3px;
     border: 0;
@@ -8,17 +8,17 @@
     font-size: 1em;
 }
 
-input[type='text'] {
+.listItems input[type='text'] {
     border: 1px solid #ddd; 
     min-width: 100%;
 }
 
-input:focus {
+.listItems input:focus {
     outline: none;
     border: 1px solid #a3b1ff;
 }
 
-.btn {
+.listItems .btn {
     text-align: center;
     font-weight: bold; 
     cursor: pointer;
@@ -26,12 +26,12 @@ input:focus {
     border-style: solid;
 }
 
-ul {
+.listItems ul {
     list-style: none;
     padding: 0;
 }
 
-.li-list {
+.listItems .li-list {
     display: flex;
     border-radius: 3px;
     justify-content: space-between;
@@ -40,10 +40,10 @@ ul {
     background-color: #dee2eb;
 }
 
-.li-list:hover {
+.listItems .li-list:hover {
     background-color: #cdcdcd;
 }
 
-.text {
+.listItems .text {
     padding: 0.5em 0.7em;
 }

@@ -353,3 +353,70 @@ code {
   background-color: #ddd;
 }
 
+.crontabs .crontabs-page{
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  width: 100%;
+}
+
+.crontabs .crontabs-page input[type="checkbox"], input[type="radio"] {
+	border: medium none;
+	height: auto;
+	line-height: normal;
+  margin: 6px 8px 8px 0px!important;
+  vertical-align: middle;
+	padding: 0;
+	width: auto;
+}
+
+.cron-option .form-control-sm {
+  margin: 0px 5px 0px 5px;
+  font-size: .775rem;
+  padding: .25rem .3rem;
+}
+
+.cron-option .cron-select-group {
+  padding: 5px 30px 10px 30px;
+}
+
+.cron-option .cron-select-group input[type="checkbox"] {
+  margin: 4px 5px 5px 5px!important;
+  vertical-align: middle;
+}
+
+.crontabs .crontabs-page .cron-option select {
+  vertical-align: middle;
+}
+
+.checkbox-group label{
+  vertical-align: middle;
+  text-align: center;
+  font-size: 0.8em;
+  display: inline-block;
+  background-color: rgba(255, 255, 255, .9);
+  border: 1px solid rgba(139, 139, 139, .3);
+  color: #8b8b8b;
+  border-radius: 5px;
+  white-space: nowrap;
+  margin: 2px 2px;
+  user-select: none;
+}
+
+.checkbox-group label {
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label {
+  border: 1px solid #006ce0;
+  background-color: #007bff;
+  color: #fff;
+}
+
+.checkbox-group input[type="checkbox"] {
+  display: absolute;
+}
+
+.checkbox-group input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+}

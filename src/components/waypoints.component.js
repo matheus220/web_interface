@@ -5,8 +5,6 @@ import axios from 'axios';
 import MapWaypoints from "./map.component";
 import './style-list-waypoints.css';
 
-const style = { position: "relative", width: "auto", overflow: "hidden"}
-
 export default class Waypoints extends Component {
 
     constructor(props) {
@@ -73,15 +71,15 @@ export default class Waypoints extends Component {
         );
 
         return (
-            <div class="row">
-                <div class="col-md-12 col-xl-9">
+            <div className="row listItems">
+                <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
                             <MapWaypoints onMarkerClick={this.onMarkerClick} waypoints={filtered} showPath={false} />
                         </div>
                     </div>
                 </div>
-                <div  class="col-md-12 col-xl-3">
+                <div  className="col-md-12 col-xl-3">
                     <div className="card">
                         <div className="card-header">
                             <h5>Waypoints</h5>

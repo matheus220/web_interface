@@ -19,7 +19,7 @@ export default class App extends Component {
       <Router>
         <div className="pcoded-wrapper">
           <nav className="pcoded-navbar navbar navbar-expand-lg navbar-dark bg-dark">
-            <a class="navbar-brand" href="https://laborange.fr/" target="_blank" rel="noopener noreferrer">
+            <a className="navbar-brand" href="https://laborange.fr/" target="_blank" rel="noopener noreferrer">
               <img src={logo} width="30" height="30" alt="https://laborange.fr/" />
             </a>
             <Link to="/" className="navbar-brand">Data Center Supervision</Link>

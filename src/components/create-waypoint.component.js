@@ -100,15 +100,15 @@ export default  class CreateWaypoints extends Component {
 
     render() {
         return (
-            <div class="row">
-                <div class="col-md-12 col-xl-9">
+            <div className="row">
+                <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
                             <MapWaypoints onMapClick={this.addMarker} waypoints={[this.state]} showPath={false} />
                         </div>
                     </div>
                 </div>
-                <div  class="col-md-12 col-xl-3 d-flex">
+                <div  className="col-md-12 col-xl-3 d-flex">
                     <div className="card">
                         <div className="card-header">
                             <h5>Create Waypoint</h5>

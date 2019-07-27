@@ -243,7 +243,6 @@ scheduleRoutes.route('/').get(function(req, res) {
             } else {
                 var t = tasks.map(task => {
                     var interval = parser.parseExpression(task.cron_expression);
-                    task['human_readable'] = cronstrue.toString(task.cron_expression);
                     task['next'] = interval.next();
                     return(task);
                 });
@@ -263,7 +262,7 @@ scheduleRoutes.route('/add').post(function(req, res) {
         .catch(err => {
             res.status(400).send('adding new task failed');
         });
-    updateFile();
+    // updateFile();
 });
 
 scheduleRoutes.route('/delete/:id').post(function(req, res) {
@@ -274,7 +273,7 @@ scheduleRoutes.route('/delete/:id').post(function(req, res) {
             res.json({ message: 'Task Deleted!'});
         }
     });
-    updateFile();
+    // updateFile();
 });
 
 app.use('/task', scheduleRoutes);

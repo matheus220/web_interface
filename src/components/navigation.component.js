@@ -97,7 +97,6 @@ export default class Navigation extends Component {
                 let traveled_waypoints = response.data.data;
                 mission_waypoints.map(waypoint => {
                     let index = traveled_waypoints.findIndex(measure => measure.waypoint._id === waypoint._id);
-                    waypoint.icon = 0;
                     if (index !== -1) {
                         switch (traveled_waypoints[index].status) {
                         case 'succeeded':
@@ -109,6 +108,8 @@ export default class Navigation extends Component {
                         case 'aborted':
                             waypoint.icon = 2;
                             break;
+                        default:
+                            waypoint.icon = 0;
                         }
                         if(traveled_waypoints[index].hasOwnProperty('input')) {
                             waypoint.images = traveled_waypoints[index].input.items.filter(item => {
@@ -117,8 +118,8 @@ export default class Navigation extends Component {
                                 return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": traveled_waypoints[index].input.timestamp});
                             });
                         }
-                        return(waypoint);
                     }
+                    return(waypoint);
                 })
                 this.setState({ logmission: response.data, map_waypoints: mission_waypoints });
             })

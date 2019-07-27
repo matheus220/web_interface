@@ -1,26 +1,43 @@
 import React, { Component } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import Cron from 'react-cron-generator'
+import cronstrue from 'cronstrue';
 import 'react-cron-generator/dist/cron-builder.css'
 import axios from 'axios';
+import Cron from "./cron-generator.component";
 
 function formatDate(date) {
     var newDate = new Date(Date.parse(date));
     return newDate.toLocaleString();
 }
 
-const Task = props => (
-    <tr>
-        <td>{formatDate(props.task.date)}</td>
-        <td>{props.task.mission_name}</td>
-        <td>{props.task.human_readable}</td>
-        <td>{formatDate(props.task.next)}</td>
-        <td style={{textAlign: "center"}}>{formatDate(props.task.active) ? "True" : "False"}</td>
-        <td style={{textAlign: "center"}}>
-            <button type="button" className="btn btn-danger" style={{margin: "0px 1px 0px 0px", fontSize: "1.1em"}}>-</button>
-        </td>
-    </tr>
-)
+class Task extends Component {
+
+    constructor(props) {
+        super(props);
+        this._onClick = this._onClick.bind(this);
+    }
+
+    _onClick() {
+        if(typeof this.props.delete === "function") {
+            this.props.delete(this.props.task._id);
+        }
+    }
+
+    render() {
+        return (
+            <tr>
+                <td>{formatDate(this.props.task.date)}</td>
+                <td>{this.props.task.mission_name}</td>
+                <td>{this.props.task.human_readable}</td>
+                <td>{formatDate(this.props.task.next)}</td>
+                <td style={{textAlign: "center"}}>{formatDate(this.props.task.active) ? "True" : "False"}</td>
+                <td style={{textAlign: "center"}}>
+                    <button type="button" id={this.props.task._id} onClick={this._onClick} className="btn btn-danger" style={{margin: "0px 1px 0px 0px", fontSize: "1.1em"}}>-</button>
+                </td>
+            </tr>
+        );
+    }
+}
 
 export default class Schedule extends Component {
 
@@ -30,7 +47,7 @@ export default class Schedule extends Component {
             modal: false,
             tasks: [],
             cron: "",
-            cron_expression: "",
+            cron_expression: "0 0 0 ? * * *",
             mission: '',
             mission_id: '',
             missions: []
@@ -46,7 +63,7 @@ export default class Schedule extends Component {
     toggleModal() {
         this.setState(prevState => ({
             modal: !prevState.modal,
-            cron_expression: "",
+            cron_expression: "0 0 0 ? * * *",
             mission: '',
             mission_id: ''
         }));
@@ -72,9 +89,9 @@ export default class Schedule extends Component {
     }
 
     onChangeCronExpression(e) {
-        console.log(e.target.value);
+        console.log(e);
         this.setState({
-            cron_expression: e.target.value
+            cron_expression: e
         });
     }
 
@@ -108,7 +125,7 @@ export default class Schedule extends Component {
                 .then(res => {
                     this.setState(prevState => ({
                         modal: !prevState.modal,
-                        cron_expression: "",
+                        cron_expression: "0 0 0 ? * * *",
                         mission: '',
                         mission_id: ''
                     }));
@@ -117,12 +134,20 @@ export default class Schedule extends Component {
     }
 
     deleteItem(id) {
-        console.log(id)
+        axios.post('http://localhost:4000/task/delete/' + id)
+            .then(response => {
+                this.setState({
+                    tasks: this.state.tasks.filter(task => task._id !== id)
+                });
+            })
+            .catch(function (error){
+                console.log(error);
+            })
     }
 
     taskList() {
-        return this.state.tasks.map((currentTask, i) => {
-            return <Task task={currentTask} key={i} />;
+        return this.state.tasks.map(currentTask => {
+            return <Task task={currentTask} key={currentTask._id} delete={this.deleteItem} />;
         })
     }
 
@@ -131,8 +156,8 @@ export default class Schedule extends Component {
             return( <option>{mission.name}</option> )       
         })
         return (
-            <div class="row">
-                <div  class="col-md-12 col-xl-12">
+            <div className="row">
+                <div  className="col-md-12 col-xl-12">
                     <div className="card">
                         <div className="card-header">
                             <h5>Task List</h5>
@@ -159,21 +184,19 @@ export default class Schedule extends Component {
                         </div>
                     </div>
                 </div>
-                <Modal isOpen={this.state.modal} toggle={this.toggleModal} className='matheus'>
+                <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
                     <ModalHeader toggle={this.toggle}>Schedule new task</ModalHeader>
                     <ModalBody>
                         <div>
-                            <label>Cron expression : </label>
-                                <input 
-                                    type="text" 
-                                    className="form-control"
-                                    value={this.state.cron_expression}
-                                    onChange={this.onChangeCronExpression}
-                                    required
-                                    />
-                            
+                            <div>
+                                <Cron onCronChange={this.onChangeCronExpression}/>
+                            </div>
+                            <hr/>
+                            <label>Cron Expression : 
+                            <p style={{textAlign: "justify", marginBottom: 0, padding: "0.3rem"}}><strong>{cronstrue.toString(this.state.cron_expression, { use24HourTimeFormat: true })}</strong></p></label>
+                            <br/>
                             <label>Mission : </label>
-                            <select class="form-control" value={this.state.mission} onChange={this.onChangeMission}>
+                            <select className="form-control" value={this.state.mission} onChange={this.onChangeMission}>
                                 <option></option>
                                 {renderMissions}
                             </select>

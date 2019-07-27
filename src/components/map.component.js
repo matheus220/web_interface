@@ -37,7 +37,6 @@ var robotPoseIcon = new LeafIcon({
 });
 
 const bounds = [[-396.06, -1771.58], [2103.94, 728.42]]
-const style = { height: "80vh", width: "100%", backgroundColor: "#cdcdcd" }
 
 export default class MapWaypoints extends Component {
 

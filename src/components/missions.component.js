@@ -5,8 +5,6 @@ import axios from 'axios';
 import MapWaypoints from "./map.component";
 import './style-list-waypoints.css';
 
-const style = { position: "relative", width: "auto", overflow: "hidden"}
-
 export default class Missions extends Component {
 
     constructor(props) {
@@ -88,22 +86,22 @@ export default class Missions extends Component {
             }
         );
 
-        let filtered_sorted = filtered.sort((m1, m2) => (m1.name > m2.name) ? 1 : -1);
+        // let filtered_sorted = filtered.sort((m1, m2) => (m1.name > m2.name) ? 1 : -1);
 
         let missions = filtered.map(mission =>
             <List key={mission._id} item={mission} selected={this.state.selected_mission._id === mission._id ? true : false} onItemClick={this.deleteItem} onItemClick2={this.select} />
         );
 
         return (
-            <div class="row">
-                <div class="col-md-12 col-xl-9">
+            <div className="row listItems">
+                <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
                             <MapWaypoints waypoints={this.state.selected_mission.path} showPath={true} />
                         </div>
                     </div>
                 </div>
-                <div  class="col-md-12 col-xl-3">
+                <div  className="col-md-12 col-xl-3">
                     <div className="card">
                     <div className="card-header">
                             <h5>Missions</h5>

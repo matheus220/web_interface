@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import { WithContext as ReactTags } from 'react-tag-input';
 import axios from 'axios';
 import MapWaypoints from "./map.component";
@@ -11,8 +10,6 @@ const KeyCodes = {
 };
   
 const delimiters = [KeyCodes.comma, KeyCodes.enter];
-
-const mapName = "WD_WA_WB"
 
 export default class CreateMission extends Component {
 
@@ -56,7 +53,7 @@ export default class CreateMission extends Component {
         const { tags } = this.state;
         const {waypoints} = this.state;
         if (tags.length > 0) {
-            var waypointIndex = waypoints.findIndex((wp => wp._id == tags[i].id));
+            var waypointIndex = waypoints.findIndex((wp => wp._id === tags[i].id));
             if (waypointIndex !== -1 ) {
                 waypoints[waypointIndex].icon = 0;
                 this.setState({
@@ -69,7 +66,7 @@ export default class CreateMission extends Component {
 
     handleAddition(tag) {
         const {waypoints} = this.state;
-        var waypointIndex = waypoints.findIndex((wp => wp._id == tag.id));
+        var waypointIndex = waypoints.findIndex((wp => wp._id === tag.id));
         if (waypointIndex !== -1 ) {
             waypoints[waypointIndex].icon = 1;
             this.setState({
@@ -133,7 +130,7 @@ export default class CreateMission extends Component {
 
     onMarkerClick = (obj: Object) => {
         let tag = {id: obj.target.options.id, text: obj.target.options.name};
-        let index = this.state.tags.findIndex((t => t.id == tag.id));
+        let index = this.state.tags.findIndex((t => t.id === tag.id));
         if ( index !== -1 ){
             this.handleDelete(index)
         }
@@ -144,15 +141,15 @@ export default class CreateMission extends Component {
 
     render() {
         return (
-            <div class="row">
-                <div class="col-md-12 col-xl-9">
+            <div className="row">
+                <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
                             <MapWaypoints onMarkerClick={this.onMarkerClick} waypoints={this.state.waypoints} showPopup={false} showPath={false} />
                         </div>
                     </div>
                 </div>
-                <div  class="col-md-12 col-xl-3">
+                <div  className="col-md-12 col-xl-3">
                     <div className="card">
                         <div className="card-header">
                             <h5>Create Mission</h5>
