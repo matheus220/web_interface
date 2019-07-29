@@ -92,9 +92,10 @@ export default class Navigation extends Component {
 
     _mode_callback (currentMode) {
         if (currentMode.data !== this.state.currentMode) {
-            this.setState({
-                currentMode: currentMode.data
-            });
+            this.setState({currentMode: currentMode.data});
+            if (currentMode.data === "TELEOPERATION") {
+                this.props.history.push('/assistance');
+            }
         }
     }
 
@@ -107,7 +108,7 @@ export default class Navigation extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://localhost:4000/logmission/')
+        axios.get('http://localhost:4000/logmission/last/patrol')
             .then(response => {
                 if (response.data !== null) {
                     let mission_waypoints = response.data.mission_id.path;
@@ -142,8 +143,6 @@ export default class Navigation extends Component {
                 } else {
                     this.setState({ logmission: [], map_waypoints: [] });
                 }
-                
-                
             })
             .catch(function (error){
                 console.log(error);

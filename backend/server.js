@@ -150,8 +150,23 @@ missionRoutes.route('/delete/:id').post(function(req, res) {
 app.use('/mission', missionRoutes);
 
 logmissionRoutes.route('/').get(function(req, res) {
+    LogMission.find(
+        function(err, logmission) {
+            if (err) {
+                console.log(err);
+            } else {
+                res.json(logmission);
+        }
+    })
+    .sort('-start_time')
+    .populate({ path: 'mission_id', populate: { path: 'path' } })
+    .populate('data.waypoint')
+    .populate({ path: 'data.input', populate: { path: 'items.item' } });
+});
+
+logmissionRoutes.route('/last/:mode').get(function(req, res) {
     LogMission.findOne(
-        { mode: 'patrol' },
+        { mode: req.params.mode },
         function(err, logmission) {
             if (err) {
                 console.log(err);

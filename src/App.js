@@ -10,6 +10,7 @@ import Navigation from "./components/navigation.component";
 import CreateWaypoint from "./components/create-waypoint.component";
 import CreateMission from "./components/create-mission.component";
 import Schedule from "./components/schedule.component";
+import Assistance from "./components/assistance.component";
 
 import logo from "./logo.png";
 
@@ -52,6 +53,7 @@ export default class App extends Component {
                     <Route path="/missions" component={Missions} />
                     <Route path="/create_mission" component={CreateMission} />
                     <Route path="/schedule" component={Schedule} />
+                    <Route path="/assistance" component={Assistance} />
                   </Switch>
                 </div>
               </div>
