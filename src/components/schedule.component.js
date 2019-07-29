@@ -55,7 +55,7 @@ export default class Schedule extends Component {
             modal: false,
             tasks: [],
             cron: "",
-            cron_expression: "0 0 ? * *",
+            cron_expression: "0 0 * * *",
             selectedMission: null,
             missions: []
         };
@@ -119,7 +119,7 @@ export default class Schedule extends Component {
                 .then(res => {
                     this.setState(prevState => ({
                         modal: !prevState.modal,
-                        cron_expression: "0 0 ? * *",
+                        cron_expression: "0 0 * * *",
                         selectedMission: null
                     }));
                     this.updateData();

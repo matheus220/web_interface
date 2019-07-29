@@ -13,6 +13,7 @@ const logRoutes = express.Router();
 const scheduleRoutes = express.Router();
 const PORT = 4000;
 
+later.date.localTime();
 let filePath = "/tmp/crontabFile.txt";
 let Models = require('./mongo.model');
 let Waypoint = Models.Waypoint;
@@ -186,11 +187,11 @@ function createRosPubCommand(task_id, cron_expression, mission_id) {
 }
 
 function updateFile(){
-    Task.find(function(err, tasks) {
+    Task.find({'active': true},
+        function(err, tasks) {
             if (err) {
                 console.log(err);
             } else {
-                console.log(tasks)
                 let message = "########## DO NOT WRITE BELOW THIS LINE ##########";
                 let setup = [message + "\n\nSHELL=/bin/bash\n"];
                 let taskList = tasks.map(task => {
@@ -198,36 +199,34 @@ function updateFile(){
                 });
                 let toWrite = setup.concat(taskList);
 
-                console.log(toWrite);
-
                 exec("crontab -l > /tmp/crontab_tmp_copy.txt", function(err, stdout, stderr) {
                     if (err) throw err;
-                    console.log('Crontab copied!');
-                });
-
-                fs.readFile('/tmp/crontab_tmp_copy.txt', {encoding: 'utf-8'}, function(err, data) {
-                    if (err) throw error;
-                
-                    let dataArray = data.split('\n'); // convert file data in an array
-                    const searchLine = message; // we are looking for a line, contains, key word 'user1' in the file
-                    let index = dataArray.indexOf(searchLine);
-
-                    if(index !== -1) {
-                        dataArray.splice(index);
-                    }
-
-                    const updatedData = dataArray.concat(toWrite);
+                    fs.readFile('/tmp/crontab_tmp_copy.txt', {encoding: 'utf-8'}, function(err, data) {
+                        if (err) throw error;
                     
-                    fs.writeFile(filePath, updatedData.join("\n"), (err) => {
-                        if (err) throw err;
-                        console.log ('Successfully updated the file data');
+                        let dataArray = data.split('\n'); // convert file data in an array
+                        const searchLine = message; // we are looking for a line, contains, key word 'user1' in the file
+                        let index = dataArray.indexOf(searchLine);
+    
+                        console.log(data)
+    
+                        if(index !== -1) {
+                            dataArray.splice(index);
+                        }
+    
+                        const updatedData = dataArray.concat(toWrite);
+                        
+                        fs.writeFile(filePath, updatedData.join("\n"), (err) => {
+                            if (err) throw err;
+                            console.log ('Successfully updated the file data');
+                        });
+    
+                        exec("crontab " + filePath, function(err, stdout, stderr) {
+                            if (err) throw err;
+                            console.log('Crontab updated!');
+                        });
+                    
                     });
-
-                    exec("crontab " + filePath, function(err, stdout, stderr) {
-                        if (err) throw err;
-                        console.log('Crontab updated!');
-                    });
-                
                 });
             }
         }
@@ -257,7 +256,7 @@ scheduleRoutes.route('/add').post(function(req, res) {
     task.save()
         .then(t => {
             res.status(200).json({'task': 'task added successfully'});
-            //updateFile();
+            updateFile();
         })
         .catch(err => {
             res.status(400).send('adding new task failed');
@@ -277,7 +276,7 @@ scheduleRoutes.route('/update/:id').post(function(req, res) {
 
             task.save().then(t => {
                 res.json('Task updated!');
-                //updateFile();
+                updateFile();
             })
             .catch(err => {
                 res.status(400).send("Update not possible");
@@ -291,7 +290,7 @@ scheduleRoutes.route('/delete/:id').post(function(req, res) {
             res.send(err);
         } else {
             res.json({ message: 'Task Deleted!'});
-            // updateFile();
+            updateFile();
         }
     });
 });

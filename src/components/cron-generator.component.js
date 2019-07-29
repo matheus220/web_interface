@@ -14,7 +14,7 @@ export default class Cron extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            result: '0 0 ? * *'
+            result: '0 0 * * *'
         }
         this.cronChange = this.cronChange.bind(this);
         this._onChange = this._onChange.bind(this);
@@ -53,7 +53,7 @@ export default class Cron extends Component {
 		if ($('#cronEveryMinute:checked').length) {
 			minutes = '*';
 		} else if ($('#cronMinuteIncrement:checked').length) {
-			minutes = $('#cronMinuteIncrementStart').val();
+			minutes = '*';
 			minutes += '/';
 			minutes += $('#cronMinuteIncrementIncrement').val();
 		} else if ($('#cronMinuteSpecific:checked').length) {
@@ -79,7 +79,7 @@ export default class Cron extends Component {
 		if ($('#cronEveryHour:checked').length) {
 			hours = '*';
 		} else if ($('#cronHourIncrement:checked').length) {
-			hours = $('#cronHourIncrementStart').val();
+			hours = '0';
 			hours += '/';
 			hours += $('#cronHourIncrementIncrement').val();
 		} else if ($('#cronHourSpecific:checked').length) {
@@ -106,19 +106,19 @@ export default class Cron extends Component {
 
 		if ($('#cronEveryDay:checked').length) {
 			dow = '*';
-			dom = '?';
+			dom = '*';
 		} else if ($('#cronDowIncrement:checked').length) {
-			dow = $('#cronDowIncrementStart').val();
+			dow = '*';
 			dow += '/';
 			dow += $('#cronDowIncrementIncrement').val();
-			dom = '?';
+			dom = '*';
 		} else if ($('#cronDomIncrement:checked').length) {
-			dom = $('#cronDomIncrementStart').val();
+			dom = '*';
 			dom += '/';
 			dom += $('#cronDomIncrementIncrement').val();
-			dow = '?';
+			dow = '*';
 		} else if ($('#cronDowSpecific:checked').length) {
-			dom = '?';
+			dom = '*';
 			$('[name="cronDowSpecificSpecific"]:checked').each(function (i, chck) {
 				dow += $(chck).val();
 				dow += ',';
@@ -129,7 +129,7 @@ export default class Cron extends Component {
 				dow = dow.slice(0, -1);
 			}
 		} else if ($('#cronDomSpecific:checked').length) {
-			dow = '?';
+			dow = '*';
 			$('[name="cronDomSpecificSpecific"]:checked').each(function (i, chck) {
 				dom += $(chck).val();
 				dom += ',';
@@ -140,7 +140,7 @@ export default class Cron extends Component {
 				dom = dom.slice(0, -1);
 			}
 		} else if ($('#cronNthDay:checked').length) {
-			dom = '?';
+			dom = '*';
 			dow = $('#cronNthDayDay').val();
 			dow += '#';
 			dow += $('#cronNthDayNth').val();;
@@ -153,7 +153,7 @@ export default class Cron extends Component {
 		if ($('#cronEveryMonth:checked').length) {
 			month = '*';
 		} else if ($('#cronMonthIncrement:checked').length) {
-			month = $('#cronMonthIncrementStart').val();
+			month = '*';
 			month += '/';
 			month += $('#cronMonthIncrementIncrement').val();
 		} else if ($('#cronMonthSpecific:checked').length) {
@@ -217,10 +217,7 @@ export default class Cron extends Component {
                                     <label htmlFor="cronMinuteIncrement">Every
                                         <select id="cronMinuteIncrementIncrement" className="form-control-sm">
                                             <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option><option value="60">60</option>
-                                        </select> minute(s) starting at minute 
-                                        <select id="cronMinuteIncrementStart" className="form-control-sm">
-                                            <option value="0">00</option><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option><option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option>
-                                        </select>
+                                        </select> minute(s)
                                     </label>
                                 </div>
                                 <div className="cron-option">
@@ -258,10 +255,7 @@ export default class Cron extends Component {
                                 <label htmlFor="cronHourIncrement">Every
                                     <select id="cronHourIncrementIncrement" className="form-control-sm">
                                         <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option>
-                                    </select> hour(s) starting at hour 
-                                    <select id="cronHourIncrementStart" className="form-control-sm">
-                                        <option value="0">00</option><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option><option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
-                                    </select>
+                                    </select> hour(s)
                                 </label>
                             </div>
                             <div className="cron-option">
@@ -298,60 +292,9 @@ export default class Cron extends Component {
                                 <label htmlFor="cronDowIncrement">Every
                                     <select id="cronDowIncrementIncrement" className="form-control-sm">
                                         <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option>
-                                    </select> day(s) starting on 
-                                    <select id="cronDowIncrementStart" className="form-control-sm">
-                                        <option value="1">Sunday</option>
-                                        <option value="2">Monday</option>
-                                        <option value="3">Tuesday</option>
-                                        <option value="4">Wednesday</option>
-                                        <option value="5">Thursday</option>
-                                        <option value="6">Friday</option>
-                                        <option value="7">Saturday</option>
-                                    </select>
+                                    </select> day(s)
                                 </label>
                             </div>								
-                            <div className="cron-option">
-                            <input type="radio" id="cronDomIncrement" name="cronDay"/>
-                            <label htmlFor="cronDomIncrement">Every
-                                <select id="cronDomIncrementIncrement" className="form-control-sm">
-                                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
-                                </select> day(s) starting on the 
-                                <select id="cronDomIncrementStart" className="form-control-sm">
-                                    <option value="1">1st</option>
-                                    <option value="2">2nd</option>
-                                    <option value="3">3rd</option>
-                                    <option value="4">4th</option>
-                                    <option value="5">5th</option>
-                                    <option value="6">6th</option>
-                                    <option value="7">7th</option>
-                                    <option value="8">8th</option>
-                                    <option value="9">9th</option>
-                                    <option value="10">10th</option>																						
-                                    <option value="11">11th</option>
-                                    <option value="12">12th</option>
-                                    <option value="13">13th</option>
-                                    <option value="14">14th</option>
-                                    <option value="15">15th</option>
-                                    <option value="16">16th</option>
-                                    <option value="17">17th</option>
-                                    <option value="18">18th</option>
-                                    <option value="19">19th</option>
-                                    <option value="20">20th</option>
-                                    <option value="21">21st</option>
-                                    <option value="22">22nd</option>
-                                    <option value="23">23rd</option>
-                                    <option value="24">24th</option>
-                                    <option value="25">25th</option>
-                                    <option value="26">26th</option>
-                                    <option value="27">27th</option>
-                                    <option value="28">28th</option>
-                                    <option value="29">29th</option>
-                                    <option value="30">30th</option>																						
-                                    <option value="31">31st</option>
-                                </select>
-                                of the month
-                            </label>
-                        </div>
                             <div className="cron-option">
                                 <input type="radio" id="cronDowSpecific" name="cronDay"/>
                                 <label htmlFor="cronDowSpecific">Specific day of week (choose one or many)</label>
@@ -370,29 +313,6 @@ export default class Cron extends Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="cron-option">
-                                <input type="radio" id="cronNthDay" name="cronDay"/>
-                                <label htmlFor="cronNthDay">
-                                    On the 
-                                    <select id="cronNthDayNth" className="form-control-sm">
-                                        <option value="1">1st</option>
-                                        <option value="2">2nd</option>
-                                        <option value="3">3rd</option>
-                                        <option value="4">4th</option>
-                                        <option value="5">5th</option>
-                                    </select>
-                                    <select id="cronNthDayDay" className="form-control-sm">
-                                        <option value="1">Sunday</option>
-                                        <option value="2">Monday</option>
-                                        <option value="3">Tuesday</option>
-                                        <option value="4">Wednesday</option>
-                                        <option value="5">Thursday</option>
-                                        <option value="6">Friday</option>
-                                        <option value="7">Saturday</option>
-                                    </select>										
-                                    of the month
-                                </label>
-                            </div>
                         </div>
                     </Tab>
                     <Tab eventKey="month" title="Month">
@@ -406,21 +326,7 @@ export default class Cron extends Component {
                                 <label htmlFor="cronMonthIncrement">Every
                                     <select id="cronMonthIncrementIncrement" className="form-control-sm">
                                         <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                    </select> month(s) starting in 
-                                    <select id="cronMonthIncrementStart" className="form-control-sm">
-                                        <option value="1">January</option>
-                                        <option value="2">February</option>
-                                        <option value="3">March</option>
-                                        <option value="4">April</option>
-                                        <option value="5">May</option>
-                                        <option value="6">June</option>																																	
-                                        <option value="7">July</option>
-                                        <option value="8">August</option>
-                                        <option value="9">September</option>
-                                        <option value="10">October</option>
-                                        <option value="11">November</option>
-                                        <option value="12">December</option>
-                                    </select>
+                                    </select> month(s)
                                 </label>
                             </div>
                             <div className="cron-option">

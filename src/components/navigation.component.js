@@ -43,7 +43,7 @@ export default class Navigation extends Component {
             current_index: 0,
             timestamp: [],
             real_time: true,
-            currentMode: 0,
+            currentMode: "UNDEFINED",
             battery: "-- ",
             changeModeTo: "",
             changeToPatrol: null,
@@ -68,7 +68,7 @@ export default class Navigation extends Component {
         let currentModeListener = new ROSLIB.Topic({
             ros : ros,
             name : '/current_mode',
-            messageType : 'std_msgs/Int8',
+            messageType : 'std_msgs/String',
             throttle_rate : 1
         });
 
@@ -200,29 +200,31 @@ export default class Navigation extends Component {
     }
 
     requestModeChange(){
-        var imuMessage = new ROSLIB.Message({
+        var stringMessage = new ROSLIB.Message({
             data: ""
         });
+        var date = new Date().toISOString();
+        
         switch (this.state.changeModeTo) {
             case 'patrol':
                 if(this.state.changeToPatrol) {
-                    imuMessage.data = "Patrol : " + this.state.changeToPatrol;   
+                    stringMessage.data = "{\"timestamp\": \"" + date + "\" \"mode\": \"patrol\", \"scheduled\": \"false\", \"mission_id\": \"" + this.state.changeToPatrol + "\"}"; 
                 }
                 break;
             case 'assistance':
-                imuMessage.data = "Assistace";
+                stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"assistance\"}";
                 break;
             case 'recharge':
-                imuMessage.data = "Recharge";
+                stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"recharge\"}";
                 break;
             case 'stop':
-                imuMessage.data = "Stop";
+                stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"stop\"}";
                 break;
             default:
                 console.log("No mode chosen")
         }
-        if(imuMessage.data !== "") {
-            console.log("Publishing..." + imuMessage.data)
+        if(stringMessage.data !== "") {
+            this.changeModePublisher.publish(stringMessage)
             this.toggleModal();
         }
         
@@ -300,7 +302,7 @@ export default class Navigation extends Component {
         return (
             <div className="row">
                 <div className="currentState">
-                    <button type="button" className="btn btn-light">{this.modeMapping[this.state.currentMode]}</button>
+                    <button type="button" className="btn btn-light">{this.state.currentMode}</button>
                     {critical_battery ? 
                         <button type="button" className="btn btn-danger">{this.state.battery}%</button> :
                         <button type="button" className="btn btn-success">{this.state.battery}%</button>
