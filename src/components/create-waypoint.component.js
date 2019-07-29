@@ -52,13 +52,7 @@ export default  class CreateWaypoints extends Component {
 
     onSubmit(e) {
         e.preventDefault();
-        
-        console.log(`Waypoint submitted:`);
-        console.log(`Name: ${this.state.name}`);
-        console.log(`Point: ${this.state.point}`);
-        console.log(`Map: ${this.state.map}`);
-        console.log(`Group: ${this.state.group}`);
-     
+             
         const newWaypoint = {
             name: this.state.name,
             point: this.state.point,

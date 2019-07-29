@@ -4,9 +4,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const cronstrue = require('cronstrue');
 const exec = require('child_process').exec;
-const parser = require('cron-parser');
+const later = require('later');
 const waypointRoutes = express.Router();
 const missionRoutes = express.Router();
 const logmissionRoutes = express.Router();
@@ -242,15 +241,15 @@ scheduleRoutes.route('/').get(function(req, res) {
                 console.log(err);
             } else {
                 var t = tasks.map(task => {
-                    var interval = parser.parseExpression(task.cron_expression);
-                    task['next'] = interval.next();
+                    var cron = later.parse.cron(task.cron_expression);
+                    task['next'] = later.schedule(cron).next(1);
+                    task['last'] = later.schedule(cron).prev(1);
                     return(task);
                 });
                 res.json(t);
             }
         }
     );
-    //updateFile();
 });
 
 scheduleRoutes.route('/add').post(function(req, res) {
@@ -258,11 +257,32 @@ scheduleRoutes.route('/add').post(function(req, res) {
     task.save()
         .then(t => {
             res.status(200).json({'task': 'task added successfully'});
+            //updateFile();
         })
         .catch(err => {
             res.status(400).send('adding new task failed');
         });
-    // updateFile();
+});
+
+scheduleRoutes.route('/update/:id').post(function(req, res) {
+    Task.findById(req.params.id, function(err, task) {
+        if (!task)
+            res.status(404).send("data is not found");
+        else
+            task.mission_id = req.body.mission_id;
+            task.mission_name = req.body.mission_name;
+            task.cron_expression = req.body.cron_expression;
+            task.date = req.body.date;
+            task.active = req.body.active;
+
+            task.save().then(t => {
+                res.json('Task updated!');
+                //updateFile();
+            })
+            .catch(err => {
+                res.status(400).send("Update not possible");
+            });
+    });
 });
 
 scheduleRoutes.route('/delete/:id').post(function(req, res) {
@@ -271,9 +291,9 @@ scheduleRoutes.route('/delete/:id').post(function(req, res) {
             res.send(err);
         } else {
             res.json({ message: 'Task Deleted!'});
+            // updateFile();
         }
     });
-    // updateFile();
 });
 
 app.use('/task', scheduleRoutes);

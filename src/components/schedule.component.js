@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import cronstrue from 'cronstrue';
-import 'react-cron-generator/dist/cron-builder.css'
+import DropdownList from 'react-widgets/lib/DropdownList'
 import axios from 'axios';
 import Cron from "./cron-generator.component";
+import 'react-widgets/dist/css/react-widgets.css';
 
 function formatDate(date) {
     var newDate = new Date(Date.parse(date));
@@ -15,6 +16,7 @@ class Task extends Component {
     constructor(props) {
         super(props);
         this._onClick = this._onClick.bind(this);
+        this._handleChangeChk = this._handleChangeChk.bind(this);
     }
 
     _onClick() {
@@ -23,16 +25,22 @@ class Task extends Component {
         }
     }
 
+    _handleChangeChk() {
+        if(typeof this.props.onChangeChk === "function") {
+            this.props.onChangeChk(this.props.task._id, !this.props.task.active);
+        }
+    }
     render() {
         return (
             <tr>
                 <td>{formatDate(this.props.task.date)}</td>
                 <td>{this.props.task.mission_name}</td>
-                <td>{this.props.task.human_readable}</td>
+                <td style={{textAlign: "justify", maxWidth: "400px"}}>{cronstrue.toString(this.props.task.cron_expression, { use24HourTimeFormat: true })}</td>
+                <td>{formatDate(this.props.task.last)}</td>
                 <td>{formatDate(this.props.task.next)}</td>
-                <td style={{textAlign: "center"}}>{formatDate(this.props.task.active) ? "True" : "False"}</td>
+                <td style={{textAlign: "center"}}><input type="checkbox" defaultChecked={this.props.task.active} onChange={this._handleChangeChk}/></td>
                 <td style={{textAlign: "center"}}>
-                    <button type="button" id={this.props.task._id} onClick={this._onClick} className="btn btn-danger" style={{margin: "0px 1px 0px 0px", fontSize: "1.1em"}}>-</button>
+                    <button type="button" id={this.props.task._id} onClick={this._onClick} className="btn btn-danger button-style" style={{width: "40px", verticalAlign: "middle", margin: "0px 0px 0px 0px", fontSize: "1.1em"}}>-</button>
                 </td>
             </tr>
         );
@@ -47,29 +55,26 @@ export default class Schedule extends Component {
             modal: false,
             tasks: [],
             cron: "",
-            cron_expression: "0 0 0 ? * * *",
-            mission: '',
-            mission_id: '',
+            cron_expression: "0 0 ? * *",
+            selectedMission: null,
             missions: []
         };
         this.toggleModal = this.toggleModal.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.onChangeCronExpression = this.onChangeCronExpression.bind(this);
-        this.onChangeMission = this.onChangeMission.bind(this);
         this.deleteItem = this.deleteItem.bind(this);
         this.taskList = this.taskList.bind(this);
+        this.updateData = this.updateData.bind(this);
+        this.updateActiveState = this.updateActiveState.bind(this);
     }
-    
+
     toggleModal() {
         this.setState(prevState => ({
-            modal: !prevState.modal,
-            cron_expression: "0 0 0 ? * * *",
-            mission: '',
-            mission_id: ''
+            modal: !prevState.modal
         }));
     }
 
-    componentDidMount() {
+    updateData() {
         axios.get('http://localhost:4000/task/')
             .then(response => {
                 console.log(response.data)
@@ -88,34 +93,23 @@ export default class Schedule extends Component {
             })
     }
 
-    onChangeCronExpression(e) {
-        console.log(e);
-        this.setState({
-            cron_expression: e
-        });
+    componentDidMount() {
+        this.updateData();
     }
 
-    onChangeMission(e) {
-        console.log(e.target);
-        let mission = this.state.missions.filter(mission => {
-            return mission.name === e.target.value;
+    onChangeCronExpression(cron) {
+        this.setState({
+            cron_expression: cron
         });
-        if (mission) {
-            this.setState({
-                mission: e.target.value,
-                mission_id: mission[0]._id
-            });
-        }
-        
     }
 
     onSubmit(e) {
         e.preventDefault();
 
-        if(this.state.cron_expression && this.state.mission_id) {
+        if(this.state.cron_expression && this.state.selectedMission) {
             const newTask = {
-                mission_id: this.state.mission_id,
-                mission_name: this.state.mission,
+                mission_id: this.state.selectedMission._id,
+                mission_name: this.state.selectedMission.name,
                 cron_expression: this.state.cron_expression,
                 active: true,
                 date: Date()
@@ -125,10 +119,10 @@ export default class Schedule extends Component {
                 .then(res => {
                     this.setState(prevState => ({
                         modal: !prevState.modal,
-                        cron_expression: "0 0 0 ? * * *",
-                        mission: '',
-                        mission_id: ''
+                        cron_expression: "0 0 ? * *",
+                        selectedMission: null
                     }));
+                    this.updateData();
                 });
         }
     }
@@ -145,16 +139,22 @@ export default class Schedule extends Component {
             })
     }
 
+    updateActiveState(id, newActiveState) {
+        var task = this.state.tasks.filter(task => task._id === id);
+        if(task) {
+            task[0].active = newActiveState;
+            axios.post('http://localhost:4000/task/update/'+id, task[0])
+                .then(res => console.log(res.data));
+        }
+    }
+
     taskList() {
         return this.state.tasks.map(currentTask => {
-            return <Task task={currentTask} key={currentTask._id} delete={this.deleteItem} />;
+            return <Task task={currentTask} key={currentTask._id} delete={this.deleteItem} onChangeChk={this.updateActiveState} />;
         })
     }
 
     render() {
-        let renderMissions = this.state.missions.map(mission => {
-            return( <option>{mission.name}</option> )       
-        })
         return (
             <div className="row">
                 <div  className="col-md-12 col-xl-12">
@@ -166,12 +166,13 @@ export default class Schedule extends Component {
                             </div>
                         </div>
                         <div className="card-block" style={{minHeight: "550px"}}>
-                            <table className="table table-striped" >
+                            <table className="table table-striped table-bordered table-tasks" style={{width: "100%"}} >
                                 <thead>
                                     <tr>
                                         <th style={{textAlign: "center"}}>Creation date</th>
                                         <th style={{textAlign: "center"}}>Mission</th>
                                         <th style={{textAlign: "center"}}>Schedule</th>
+                                        <th style={{textAlign: "center"}}>Previous</th>
                                         <th style={{textAlign: "center"}}>Next</th>
                                         <th style={{textAlign: "center"}}>Active</th>
                                         <th style={{textAlign: "center"}}>Action</th>
@@ -196,10 +197,14 @@ export default class Schedule extends Component {
                             <p style={{textAlign: "justify", marginBottom: 0, padding: "0.3rem"}}><strong>{cronstrue.toString(this.state.cron_expression, { use24HourTimeFormat: true })}</strong></p></label>
                             <br/>
                             <label>Mission : </label>
-                            <select className="form-control" value={this.state.mission} onChange={this.onChangeMission}>
-                                <option></option>
-                                {renderMissions}
-                            </select>
+                            <DropdownList
+                                filter={(item, searchTerm) => item.name.indexOf(searchTerm) > -1}
+                                data={this.state.missions}
+                                textField='name'
+                                valueField='_id'
+                                onChange={selectedMission => this.setState({selectedMission})}
+                                placeholder="Choose a mission"
+                            />
                         </div>
                     </ModalBody>
                     <ModalFooter>

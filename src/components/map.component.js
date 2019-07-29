@@ -15,9 +15,9 @@ L.Icon.Default.mergeOptions({
 
 var LeafIcon = L.Icon.extend({
     options: {
-        iconSize:     [35, 40],
-        iconAnchor:   [17.5, 40],
-        popupAnchor:  [-5, -46]
+        iconSize:     [28, 30],
+        iconAnchor:   [14, 30],
+        popupAnchor:  [-5, -36]
     }
 });
 

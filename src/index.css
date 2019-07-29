@@ -81,7 +81,22 @@ code {
   display: inline-block;
   position: absolute;
   float: right;
-  padding: 7px 0;
+  padding: 5px 0;
+}
+
+.card-header-right .btn {
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+  line-height: 2em;
+  border-radius: 3px;
+  border: 0;
+  display: inline-block;
+  margin: 10px 0;
+  padding: 0.2em 1em;
+  font-size: 1em;
 }
 
 .card-header-right-text {
@@ -109,7 +124,7 @@ code {
   color: #fff;
   font-size: 1.2em;
   right: 3.0rem;
-  top: 0px;
+  top: 10px;
   position: absolute;
 }
 
@@ -419,4 +434,14 @@ code {
 .checkbox-group input[type="checkbox"] {
   position: absolute;
   opacity: 0;
+}
+
+.table-tasks td {
+  text-align: center;
+  vertical-align: middle!important;
+}
+
+.change-mode-card button {
+  margin: 3px 0px;
+  min-width: 23%;
 }

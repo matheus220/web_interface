@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import ImageGallery from 'react-image-gallery';
 import ROSLIB from 'roslib';
+import DropdownList from 'react-widgets/lib/DropdownList'
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import MapWaypoints from "./map.component";
 import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
 import "react-image-gallery/styles/css/image-gallery.css";
+import 'react-widgets/dist/css/react-widgets.css';
 //http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=20
 //http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=20
 //http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=20
@@ -41,7 +44,10 @@ export default class Navigation extends Component {
             timestamp: [],
             real_time: true,
             currentMode: 0,
-            battery: -1
+            battery: "-- ",
+            changeModeTo: "",
+            changeToPatrol: null,
+            missions: []
         };
 
         this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -49,6 +55,9 @@ export default class Navigation extends Component {
         this.onSlide = this.onSlide.bind(this);
         this._mode_callback = this._mode_callback.bind(this);
         this._battery_callback = this._battery_callback.bind(this);
+        this.changeMode = this.changeMode.bind(this);
+        this.toggleModal = this.toggleModal.bind(this);
+        this.requestModeChange = this.requestModeChange.bind(this);
         
         let robot_IP = "192.168.1.96";
 
@@ -68,6 +77,13 @@ export default class Navigation extends Component {
             name : '/npb/power_info',
             messageType : 'npb/MsgPowerInfo',
             throttle_rate : 1
+        });
+
+        this.changeModePublisher = new ROSLIB.Topic({
+            ros : ros,
+            name : '/change_mode',
+            messageType : 'std_msgs/String',
+            throttle_rate : 10
         });
 
         currentModeListener.subscribe(this._mode_callback);
@@ -93,35 +109,41 @@ export default class Navigation extends Component {
     componentDidMount() {
         axios.get('http://localhost:4000/logmission/')
             .then(response => {
-                let mission_waypoints = response.data.mission_id.path;
-                let traveled_waypoints = response.data.data;
-                mission_waypoints.map(waypoint => {
-                    let index = traveled_waypoints.findIndex(measure => measure.waypoint._id === waypoint._id);
-                    if (index !== -1) {
-                        switch (traveled_waypoints[index].status) {
-                        case 'succeeded':
-                            waypoint.icon = 1;
-                            break;
-                        case 'active':
-                            waypoint.icon = 3;
-                            break;
-                        case 'aborted':
-                            waypoint.icon = 2;
-                            break;
-                        default:
-                            waypoint.icon = 0;
+                if (response.data !== null) {
+                    let mission_waypoints = response.data.mission_id.path;
+                    let traveled_waypoints = response.data.data;
+                    mission_waypoints.map(waypoint => {
+                        let index = traveled_waypoints.findIndex(measure => measure.waypoint._id === waypoint._id);
+                        if (index !== -1) {
+                            switch (traveled_waypoints[index].status) {
+                            case 'succeeded':
+                                waypoint.icon = 1;
+                                break;
+                            case 'active':
+                                waypoint.icon = 3;
+                                break;
+                            case 'aborted':
+                                waypoint.icon = 2;
+                                break;
+                            default:
+                                waypoint.icon = 0;
+                            }
+                            if(traveled_waypoints[index].hasOwnProperty('input')) {
+                                waypoint.images = traveled_waypoints[index].input.items.filter(item => {
+                                    return(item.model === "Camera")
+                                }).map(item => {
+                                    return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": traveled_waypoints[index].input.timestamp});
+                                });
+                            }
                         }
-                        if(traveled_waypoints[index].hasOwnProperty('input')) {
-                            waypoint.images = traveled_waypoints[index].input.items.filter(item => {
-                                return(item.model === "Camera")
-                            }).map(item => {
-                                return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": traveled_waypoints[index].input.timestamp});
-                            });
-                        }
-                    }
-                    return(waypoint);
-                })
-                this.setState({ logmission: response.data, map_waypoints: mission_waypoints });
+                        return(waypoint);
+                    })
+                    this.setState({ logmission: response.data, map_waypoints: mission_waypoints });
+                } else {
+                    this.setState({ logmission: [], map_waypoints: [] });
+                }
+                
+                
             })
             .catch(function (error){
                 console.log(error);
@@ -129,6 +151,13 @@ export default class Navigation extends Component {
         axios.get('http://localhost:4000/log/')
             .then(response => {
                 this.setState({ logs: response.data});
+            })
+            .catch(function (error){
+                console.log(error);
+            })
+        axios.get('http://localhost:4000/mission/')
+            .then(response => {
+                this.setState({ missions: response.data});
             })
             .catch(function (error){
                 console.log(error);
@@ -170,6 +199,50 @@ export default class Navigation extends Component {
         }
     }
 
+    requestModeChange(){
+        var imuMessage = new ROSLIB.Message({
+            data: ""
+        });
+        switch (this.state.changeModeTo) {
+            case 'patrol':
+                if(this.state.changeToPatrol) {
+                    imuMessage.data = "Patrol : " + this.state.changeToPatrol;   
+                }
+                break;
+            case 'assistance':
+                imuMessage.data = "Assistace";
+                break;
+            case 'recharge':
+                imuMessage.data = "Recharge";
+                break;
+            case 'stop':
+                imuMessage.data = "Stop";
+                break;
+            default:
+                console.log("No mode chosen")
+        }
+        if(imuMessage.data !== "") {
+            console.log("Publishing..." + imuMessage.data)
+            this.toggleModal();
+        }
+        
+    }
+
+    changeMode(mode) {
+        this.setState(prevState => ({
+            modal: !prevState.modal,
+            changeModeTo: mode
+        }));
+    }
+
+    toggleModal() {
+        this.setState(prevState => ({
+            modal: !prevState.modal,
+            changeModeTo: "",
+            changeToPatrol: ""
+        }));
+    }
+
     toggleRealTime() {
         this.setState({
             real_time: true,
@@ -188,12 +261,12 @@ export default class Navigation extends Component {
 
     render() {
 
-        let logs = this.state.logs.map(mission => {
+        let logs = this.state.logs.map((mission, i) => {
             let circle_color = "b-" + mission.levelname.toLowerCase() + " update-icon ring";
             let text_color = "t-" + mission.levelname.toLowerCase();
             let date = new Date(Date.parse(mission.date));
             return (
-                <div className="row p-t-15 p-b-15">
+                <div className="row p-t-15 p-b-15" key={i}>
                     <div className="col-auto text-right update-meta p-r-0">
                         <i className={circle_color}></i>
                     </div>
@@ -207,7 +280,7 @@ export default class Navigation extends Component {
             );
         });
 
-        let has_mission = this.state.map_waypoints !== [];
+        let has_mission = this.state.map_waypoints.length !== 0;
         let mission_time_info = "";
         let title = "";
         if (has_mission) {
@@ -223,18 +296,18 @@ export default class Navigation extends Component {
         }
 
         let critical_battery = this.state.battery < 30;
-        
+
         return (
-            <div class="row">
+            <div className="row">
                 <div className="currentState">
-                    <button type="button" class="btn btn-light">{this.modeMapping[this.state.currentMode]}</button>
+                    <button type="button" className="btn btn-light">{this.modeMapping[this.state.currentMode]}</button>
                     {critical_battery ? 
-                        <button type="button" class="btn btn-danger">{this.state.battery}%</button> :
-                        <button type="button" class="btn btn-success">{this.state.battery}%</button>
+                        <button type="button" className="btn btn-danger">{this.state.battery}%</button> :
+                        <button type="button" className="btn btn-success">{this.state.battery}%</button>
                     }
                     
                 </div>
-                <div class="col-md-12 col-xl-6">
+                <div className="col-md-12 col-xl-6">
                     <div className="card">
                         {has_mission ? 
                         <div className="card-header">
@@ -252,25 +325,57 @@ export default class Navigation extends Component {
                             <MapWaypoints waypoints={this.state.map_waypoints} robotPose={true} onMarkerClick={this.onMarkerClick} showPath={true} height={"80.9vh"}/>
                         </div>
                     </div>
+                    <div className="card" style={{marginTop: "20px"}}>
+                        <div className="card-header">
+                            <h5>Change mode</h5>
+                        </div>
+                        <div className="card-block change-mode-card" style={{paddingTop: "5px"}}>
+                            <div className="d-flex justify-content-between">
+                                <button type="button" className="btn btn-primary" onClick={()=>this.changeMode("patrol")}>Patrol</button>
+                                <button type="button" className="btn btn-warning" onClick={()=>this.changeMode("assistance")}>Assistance</button>
+                                <button type="button" className="btn btn-success" onClick={()=>this.changeMode("recharge")}>Recharge</button>
+                                <button type="button" className="btn btn-danger" onClick={()=>this.changeMode("stop")}>Stop</button>
+                            </div>
+                        </div>
+                    </div>
+                    <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
+                        <ModalHeader toggle={this.toggle}>Switch to {this.state.changeModeTo} mode</ModalHeader>
+                        {this.state.changeModeTo === "patrol" ?
+                        <ModalBody>
+                            <DropdownList
+                                filter={(item, searchTerm) => item.name.indexOf(searchTerm) > -1}
+                                data={this.state.missions}
+                                textField='name'
+                                valueField='_id'
+                                onChange={changeToPatrol => this.setState({changeToPatrol: changeToPatrol._id})}
+                                placeholder="Choose the mission to be performed"
+                            />
+                        </ModalBody> :
+                        null }
+                        <ModalFooter>
+                            <Button color="primary" onClick={this.requestModeChange}>Yes</Button>{' '}
+                            <Button color="secondary" onClick={this.toggleModal}>No</Button>
+                        </ModalFooter>
+                    </Modal>
                 </div>
-                <div  class="col-md-12 col-xl-6">
+                <div  className="col-md-12 col-xl-6">
                     <div className="card">
                         {this.state.real_time ?
                         <div className="card-header">
                             <h5>{this.state.cameras[this.state.current_index]}</h5>
-                            <div className="card-header-right-text" style={{paddingTop: "0px"}}>
-                                <button type="button" class="btn btn-success">REAL-TIME</button>
+                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
+                                <button type="button" className="btn btn-success">REAL-TIME</button>
                             </div>
                         </div> :
                         <div className="card-header">
                             <h5>{this.state.cameras[this.state.current_index]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
                             <span className="caption-text">Photo taken at {this.state.timestamp[this.state.current_index]}</span>
                             <div className="card-header-right-text" style={{paddingTop: "0px"}}>
-                                <button type="button" onClick={this.toggleRealTime} class="btn btn-secondary">REAL-TIME</button>
+                                <button type="button" onClick={this.toggleRealTime} className="btn btn-secondary">REAL-TIME</button>
                             </div>
                         </div>
                         }
-                        <div className="card-block" style={{paddingTop: "5px"}}>
+                        <div className="card-block" style={{paddingTop: "5px", minHeight: "400px"}}>
                             <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} lazyLoad={false} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
@@ -279,11 +384,14 @@ export default class Navigation extends Component {
                             <h5>Latest Activity</h5>
                         </div>
                         <div className="card-block" style={{paddingTop: "0px"}}>
+                            {logs.length ?
                             <Scrollbars autoHide style={{ width: "auto", height: "220px" }}>
                                 <div className="latest-update-box">
                                     {logs}
                                 </div>
-                            </Scrollbars>
+                            </Scrollbars> :
+                            <h4 style={{textAlign: "center", marginTop: "10px", color: "rgb(205, 205, 205)"}}>No log found</h4>
+                            }
                         </div>
                     </div>
                 </div>
