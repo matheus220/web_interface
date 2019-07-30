@@ -5,7 +5,6 @@ import axios from 'axios';
 import MapWaypoints from "./map.component";
 import ImageGallery from 'react-image-gallery';
 import ReactNipple from 'react-nipple';
-import 'react-nipple/lib/styles.css';
 
 function LoadingScreen() {
     return (
@@ -23,6 +22,24 @@ function LoadingScreen() {
         </div>
     );
 }
+
+function JoystickCmd(evt, data) {
+    
+    var direction = data.angle.degree - 90;
+    if (direction > 180) {
+        direction = -(450 - data.angle.degree);
+    }
+    // convert angles to radians and scale linear and angular speed
+    // adjust if youwant robot to drvie faster or slower
+    var lin = Math.cos(direction / 57.29) * data.distance * 0.005;
+    var ang = Math.sin(direction / 57.29) * data.distance * 0.05;
+    // nipplejs is triggering events when joystic moves each pixel
+    // we need delay between consecutive messege publications to 
+    // prevent system from being flooded by messages
+    // events triggered earlier than 50ms after last publication will be dropped 
+    console.log(lin, ang)
+}
+
 
 class AssistanceScreen extends Component {
     constructor(props) {
@@ -88,20 +105,33 @@ class AssistanceScreen extends Component {
                             <ImageGallery defaultImage={"/error.jpg"} items={this.state.images} lazyLoad={false} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
-                    <div className="card" style={{marginTop: "20px"}}>
-                        <div className="card-block change-mode-card d-flex justify-content-center" style={{paddingTop: "5px"}}>
-                            <ReactNipple
-                                options={{ mode: 'static', position: { top: '54%', left: '50%' }, color: '#0066ff', size: 150}}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                    position: 'relative'
-                                    // if you pass position: 'relative', you don't need to import the stylesheet
-                                }}
-                                onMove={(evt, data) => console.log(evt, data)}
-                            />
+                    <div className="row">
+                        <div className="col-md-12 col-xl-6">
+                            <div className="card" style={{marginTop: "20px"}}>
+                                <div className="card-block change-mode-card d-flex justify-content-center" style={{paddingTop: "5px"}}>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-12 col-xl-6">
+                            <div className="card" style={{marginTop: "20px"}}>
+                                <div className="card-block change-mode-card d-flex justify-content-center" style={{paddingTop: "5px"}}>
+                                    <ReactNipple
+                                        options={{ mode: 'static', position: { top: '54%', left: '50%' }, color: '#0066ff', size: 150}}
+                                        style={{
+                                            width: 200,
+                                            height: 275,
+                                            position: 'relative'
+                                            // if you pass position: 'relative', you don't need to import the stylesheet
+                                        }}
+                                        onMove={(evt, data) => JoystickCmd(evt, data)}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    
+                    
                     
                 </div>
             </div>
@@ -138,11 +168,11 @@ export default class Assistance extends Component {
     }
 
     componentDidMount() {
-        //this.modeCallback("TELEOPERATION");
+        this.modeCallback("TELEOPERATION");
     }
 
     modeCallback(currentMode) {
-        if (currentMode.data === "TELEOPERATION") {
+        if (currentMode === "TELEOPERATION") {
             this.setState({displayLoading: false});
             clearTimeout(this.timer);
         } else {

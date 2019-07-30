@@ -118,6 +118,7 @@ export default class Navigation extends Component {
                     let traveled_waypoints = response.data.data;
                     mission_waypoints.map(waypoint => {
                         let index = traveled_waypoints.findIndex(measure => measure.waypoint._id === waypoint._id);
+                        waypoint.icon = 5;
                         if (index !== -1) {
                             switch (traveled_waypoints[index].status) {
                             case 'succeeded':
@@ -130,7 +131,7 @@ export default class Navigation extends Component {
                                 waypoint.icon = 2;
                                 break;
                             default:
-                                waypoint.icon = 0;
+                                waypoint.icon = 5;
                             }
                             if(traveled_waypoints[index].hasOwnProperty('input')) {
                                 waypoint.images = traveled_waypoints[index].input.items.filter(item => {

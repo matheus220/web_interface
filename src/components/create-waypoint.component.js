@@ -22,7 +22,7 @@ export default  class CreateWaypoints extends Component {
             point: [0.0, 0.0, 0.0],
             map: mapName,
             group: '',
-            icon: 4
+            icon: 0
         }
     }
 

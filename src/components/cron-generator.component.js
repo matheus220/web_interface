@@ -79,7 +79,7 @@ export default class Cron extends Component {
 		if ($('#cronEveryHour:checked').length) {
 			hours = '*';
 		} else if ($('#cronHourIncrement:checked').length) {
-			hours = '0';
+			hours = '*';
 			hours += '/';
 			hours += $('#cronHourIncrementIncrement').val();
 		} else if ($('#cronHourSpecific:checked').length) {

@@ -17,7 +17,7 @@ var LeafIcon = L.Icon.extend({
     options: {
         iconSize:     [28, 30],
         iconAnchor:   [14, 30],
-        popupAnchor:  [-5, -36]
+        popupAnchor:  [0, -36]
     }
 });
 
@@ -26,7 +26,8 @@ var icons = [
     new LeafIcon({iconUrl: require('./../green.png')}), 
     new LeafIcon({iconUrl: require('./../red.png')}),
     new LeafIcon({iconUrl: require('./../orange.png')}),
-    new LeafIcon({iconUrl: require('./../purple.png')})
+    new LeafIcon({iconUrl: require('./../purple.png')}),
+    new LeafIcon({iconUrl: require('./../grey.png')})
 ]
 
 var robotPoseIcon = new LeafIcon({
@@ -112,7 +113,7 @@ export default class MapWaypoints extends Component {
                     {show_robot_pose ? 
                         <Marker icon={robotPoseIcon} position={[this.state.robot_pose[1]/0.05, this.state.robot_pose[0]/0.05]}/> 
                     : null}
-                    {this.props.showPath ? <Polyline color="red" weight={3} opacity={0.8} lineJoin="round" positions={this.pointList(this.props.waypoints)} /> : null}
+                    {this.props.showPath ? <Polyline color="red" weight={3} opacity={0.8} lineJoin="round" dashArray="10, 10" dashOffset="0" positions={this.pointList(this.props.waypoints)} /> : null}
                 </Map>
             </div>
         )
