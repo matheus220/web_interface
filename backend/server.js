@@ -198,7 +198,7 @@ logRoutes.route('/').get(function(req, res) {
 app.use('/log', logRoutes);
 
 function createRosPubCommand(task_id, cron_expression, mission_id) {
-    return("# " + task_id + "\n" + cron_expression  + " source /opt/ros/kinetic/setup.bash && rostopic pub -1 /change_mode std_msgs/String \"data: '{\\\"timestamp\\\": \\\"$(date +\"\\%d\\%m\\%Y\\%H\\%M\\%S\\%3N\")\\\", \\\"mode\\\": \\\"patrol\\\", \\\"scheduled\\\": \\\"true\\\", \\\"mission_id\\\": \\\"" + mission_id + "\\\"}'\"\n");
+    return("# " + task_id + "\n" + cron_expression  + " source /opt/ros/kinetic/setup.bash && rostopic pub -1 /change_mode std_msgs/String \"data: '{\\\"timestamp\\\": \\\"$(date +\"\\%d\\%m\\%Y\\%H\\%M\\%S\\%3N\")\\\", \\\"mode\\\": \\\"scheduled_patrol\\\", \\\"scheduled\\\": \\\"true\\\", \\\"mission_id\\\": \\\"" + mission_id + "\\\"}'\"\n");
 }
 
 function updateFile(){
@@ -222,9 +222,7 @@ function updateFile(){
                         let dataArray = data.split('\n'); // convert file data in an array
                         const searchLine = message; // we are looking for a line, contains, key word 'user1' in the file
                         let index = dataArray.indexOf(searchLine);
-    
-                        console.log(data)
-    
+        
                         if(index !== -1) {
                             dataArray.splice(index);
                         }

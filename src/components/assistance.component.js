@@ -29,9 +29,9 @@ class AssistanceScreen extends Component {
         super(props);
 
         this.defaultImages = [
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=20' },
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=20' },
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=20' }
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=10' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=10' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=10' }
         ]
         this.defaultCameras = ['camera1', 'camera2', 'camera3']
 
@@ -134,7 +134,7 @@ export default class Assistance extends Component {
 
         this.currentModeListener.subscribe(this.modeCallback);
 
-        this.timer = setTimeout(this.handleTimeout, 10000);
+        this.timer = setTimeout(this.handleTimeout, 5000);
     }
 
     componentDidMount() {
@@ -148,7 +148,7 @@ export default class Assistance extends Component {
         } else {
             this.setState({displayLoading: true});
             clearTimeout(this.timer);
-            this.timer = setTimeout(this.handleTimeout, 10000);
+            this.timer = setTimeout(this.handleTimeout, 5000);
         }
     }
 

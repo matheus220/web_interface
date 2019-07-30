@@ -8,19 +8,20 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
 import "react-image-gallery/styles/css/image-gallery.css";
 import 'react-widgets/dist/css/react-widgets.css';
-//http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=20
-//http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=20
-//http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=20
-//http://lorempixel.com/1000/600/nature/1/
+
+function FormatDate(date) {
+    return(date.slice(5,-7))
+}
+
 export default class Navigation extends Component {
     constructor(props) {
         super(props);
         this.defaultImages = [
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=20' },
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=20' },
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=20' }
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=7' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=7' },
+            { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=7' }
         ]
-        this.defaultCameras = ['camera1', 'camera2', 'camera3']
+        this.defaultCameras = ['bass_camera', 'middle_camera', 'top_camera']
 
         this.modeMapping = [
             "UNDEFINED",
@@ -58,6 +59,7 @@ export default class Navigation extends Component {
         this.changeMode = this.changeMode.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
         this.requestModeChange = this.requestModeChange.bind(this);
+        this.fetchData = this.fetchData.bind(this);
         
         let robot_IP = "192.168.1.96";
 
@@ -65,14 +67,14 @@ export default class Navigation extends Component {
             url: "ws://" + robot_IP + ":9090"
         });
 
-        let currentModeListener = new ROSLIB.Topic({
+        this.currentModeListener = new ROSLIB.Topic({
             ros : ros,
             name : '/current_mode',
             messageType : 'std_msgs/String',
             throttle_rate : 1
         });
 
-        let batteryListener = new ROSLIB.Topic({
+        this.batteryListener = new ROSLIB.Topic({
             ros : ros,
             name : '/npb/power_info',
             messageType : 'npb/MsgPowerInfo',
@@ -83,11 +85,12 @@ export default class Navigation extends Component {
             ros : ros,
             name : '/change_mode',
             messageType : 'std_msgs/String',
-            throttle_rate : 10
+            throttle_rate : 100
         });
 
-        currentModeListener.subscribe(this._mode_callback);
-        batteryListener.subscribe(this._battery_callback);
+        this.currentModeListener.subscribe(this._mode_callback);
+        this.batteryListener.subscribe(this._battery_callback);
+        this.changeModePublisher.advertise();
     }
 
     _mode_callback (currentMode) {
@@ -107,10 +110,10 @@ export default class Navigation extends Component {
         }
     }
 
-    componentDidMount() {
+    fetchData() {
         axios.get('http://localhost:4000/logmission/last/patrol')
             .then(response => {
-                if (response.data !== null) {
+                if (response.data !== this.state.logmission) {
                     let mission_waypoints = response.data.mission_id.path;
                     let traveled_waypoints = response.data.data;
                     mission_waypoints.map(waypoint => {
@@ -140,8 +143,6 @@ export default class Navigation extends Component {
                         return(waypoint);
                     })
                     this.setState({ logmission: response.data, map_waypoints: mission_waypoints });
-                } else {
-                    this.setState({ logmission: [], map_waypoints: [] });
                 }
             })
             .catch(function (error){
@@ -149,30 +150,41 @@ export default class Navigation extends Component {
             })
         axios.get('http://localhost:4000/log/')
             .then(response => {
-                this.setState({ logs: response.data});
-            })
-            .catch(function (error){
-                console.log(error);
-            })
-        axios.get('http://localhost:4000/mission/')
-            .then(response => {
-                this.setState({ missions: response.data});
+                console.log("entrou_")
+                if(response.data.length) {
+                    if(this.state.logs.length) {
+                        if(response.data[0]._id !== this.state.logs[0]._id) {
+                            this.setState({ logs: response.data});
+                        }
+                    } else {
+                        this.setState({ logs: response.data});
+                    }
+                }
             })
             .catch(function (error){
                 console.log(error);
             })
     }
 
-    componentDidUpdate(){
-        axios.get('http://localhost:4000/log/')
+    componentDidMount() {
+        this.fetchData();
+        axios.get('http://localhost:4000/mission/')
             .then(response => {
-                if(response.data.length !== this.state.logs.length) {
-                    this.setState({ logs: response.data});
+                if(response.data.length !== this.state.missions.length) {
+                    this.setState({ missions: response.data});
                 }
             })
             .catch(function (error){
                 console.log(error);
             })
+        this.interval = setInterval(() => this.fetchData(), 5000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
+        this.currentModeListener.unsubscribe(this._mode_callback);
+        this.batteryListener.unsubscribe(this._battery_callback);
+        this.changeModePublisher.unadvertise();
     }
 
     onMarkerClick(e) {
@@ -186,7 +198,7 @@ export default class Navigation extends Component {
             });
             let timestamp = waypoint.images.map(img => {
                 let date = new Date(Date.parse(img.timestamp));
-                return date.toLocaleString();
+                return FormatDate(date.toUTCString());
             });
             this.setState({
                 real_time: false,
@@ -207,7 +219,7 @@ export default class Navigation extends Component {
         switch (this.state.changeModeTo) {
             case 'patrol':
                 if(this.state.changeToPatrol) {
-                    stringMessage.data = "{\"timestamp\": \"" + date + "\" \"mode\": \"patrol\", \"scheduled\": \"false\", \"mission_id\": \"" + this.state.changeToPatrol + "\"}"; 
+                    stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"patrol\", \"mission_id\": \"" + this.state.changeToPatrol + "\"}"; 
                 }
                 break;
             case 'assistance':
@@ -249,6 +261,7 @@ export default class Navigation extends Component {
             real_time: true,
             images: this.defaultImages,
             cameras: this.defaultCameras,
+            current_index: 0,
             timestamp: [],
             waypointName: ""
         });
@@ -272,7 +285,7 @@ export default class Navigation extends Component {
                         <i className={circle_color}></i>
                     </div>
                     <div className="col p-l-5" style={{width: "100%"}}>
-                        <h6><strong className={text_color}>{mission.levelname}</strong> | {date.toLocaleString()}</h6>
+                        <h6><strong className={text_color}>{mission.levelname}</strong> | {FormatDate(date.toUTCString())}</h6>
                         <p className="text-muted m-b-0">
                             {mission.message}
                         </p>
@@ -287,11 +300,11 @@ export default class Navigation extends Component {
         if (has_mission) {
             if (this.state.logmission.hasOwnProperty('end_time')) {
                 let date = new Date(Date.parse(this.state.logmission.end_time));
-                mission_time_info = "Finished at " + date.toLocaleTimeString();
+                mission_time_info = "Finished at " + FormatDate(date.toUTCString());
                 title = "Last mission";
             } else {
                 let date = new Date(Date.parse(this.state.logmission.start_time));
-                mission_time_info = "Started at " + date.toLocaleTimeString();
+                mission_time_info = "Started at " + FormatDate(date.toUTCString());
                 title = "Current mission";
             }
         }
@@ -371,13 +384,13 @@ export default class Navigation extends Component {
                         <div className="card-header">
                             <h5>{this.state.cameras[this.state.current_index]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
                             <span className="caption-text">Photo taken at {this.state.timestamp[this.state.current_index]}</span>
-                            <div className="card-header-right-text" style={{paddingTop: "0px"}}>
+                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
                                 <button type="button" onClick={this.toggleRealTime} className="btn btn-secondary">REAL-TIME</button>
                             </div>
                         </div>
                         }
                         <div className="card-block" style={{paddingTop: "5px", minHeight: "400px"}}>
-                            <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} lazyLoad={false} showThumbnails={false} showPlayButton={false} showBullets={true}/>
+                            <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
                     <div className="card latest-update-card" style={{marginTop: "20px"}}>
