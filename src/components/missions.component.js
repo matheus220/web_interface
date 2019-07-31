@@ -69,7 +69,6 @@ export default class Missions extends Component {
                 selected_mission: { _id: '', name: '', path: [] }
             });
         } else {
-            console.log(e);
             e.path[0].icon = 1;
             this.setState({
                 selected_mission: e
@@ -151,7 +150,6 @@ class List extends Component {
 
     render() {
         let classes = "col text li-missions" + (this.props.selected ? " selected" : "");
-        console.log(classes);
         return (
             <li key={this.props.item._id} className="li-list">
                 <div className={classes}  onClick={this._onClick2}>{this.props.item.name}</div>

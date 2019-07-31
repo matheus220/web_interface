@@ -77,7 +77,6 @@ export default class Schedule extends Component {
     updateData() {
         axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/task/')
             .then(response => {
-                console.log(response.data)
                 this.setState({ tasks: response.data });
             })
             .catch(function (error){

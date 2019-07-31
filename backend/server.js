@@ -182,20 +182,25 @@ logmissionRoutes.route('/last/:mode').get(function(req, res) {
 });
 
 logmissionRoutes.route('/date/:date').get(function(req, res) {
-    var date = moment.utc(moment(req.params.date, "YYYY-MM-DD"));
+    var date = moment(moment.utc(req.params.date), "YYYY-MM-DD");
     var start = date.startOf('day').toDate();
     var end = date.endOf('day').toDate();
-    console.log(start, end)
     LogMission.find({
         $and: [
             {
-                $or: [
-                    { end_time: { $gte: start } },
-                    { start_time: { $lte: end } }
-                ]
+                mode: { $in: ['patrol', 'assistance'] }
             },
             {
-                mode: { $in: ['patrol', 'assistance'] }
+                start_time: { $exists: true }
+            },
+            {
+                end_time: { $exists: true }
+            },
+            {
+                $or: [
+                    { end_time: { $gte: start, $lte: end } },
+                    { start_time: { $gte: start, $lte: end } }
+                ]
             }
         ]},
         function(err, logmission) {

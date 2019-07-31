@@ -25,6 +25,7 @@
     "react-widgets-moment": "^4.0.27",
     "reactstrap": "^8.0.1",
     "roslib": "^1.0.1",
+    "typescript": "^3.5.3",
     "vis": "^4.21.0"
   },
   "scripts": {

@@ -13,7 +13,6 @@ export default class Waypoints extends Component {
 
         this.updateSearch = this.updateSearch.bind(this);
         this.deleteItem = this.deleteItem.bind(this);
-        this.onMarkerClick = this.onMarkerClick.bind(this);
     }
 
     updateSearch(e) {
@@ -54,10 +53,6 @@ export default class Waypoints extends Component {
             })        
     }
 
-    onMarkerClick(e) {
-        //this.setState({ search: e.target.options.name });
-    }
-
     render() {
 
         let filtered = this.state.waypoints.filter(
@@ -75,7 +70,7 @@ export default class Waypoints extends Component {
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints onMarkerClick={this.onMarkerClick} waypoints={filtered} showPopup={true} showPath={false} />
+                            <MapWaypoints waypoints={filtered} showPopup={true} showPath={false} />
                         </div>
                     </div>
                 </div>
