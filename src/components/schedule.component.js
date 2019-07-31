@@ -75,7 +75,7 @@ export default class Schedule extends Component {
     }
 
     updateData() {
-        axios.get('http://localhost:4000/task/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/task/')
             .then(response => {
                 console.log(response.data)
                 this.setState({ tasks: response.data });
@@ -84,7 +84,7 @@ export default class Schedule extends Component {
                 console.log(error);
             })
 
-        axios.get('http://localhost:4000/mission/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/')
             .then(response => {
                 this.setState({ missions: response.data });
             })
@@ -115,7 +115,7 @@ export default class Schedule extends Component {
                 date: Date()
             };
     
-            axios.post('http://localhost:4000/task/add', newTask)
+            axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/task/add', newTask)
                 .then(res => {
                     this.setState(prevState => ({
                         modal: !prevState.modal,
@@ -128,7 +128,7 @@ export default class Schedule extends Component {
     }
 
     deleteItem(id) {
-        axios.post('http://localhost:4000/task/delete/' + id)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/task/delete/' + id)
             .then(response => {
                 this.setState({
                     tasks: this.state.tasks.filter(task => task._id !== id)
@@ -143,7 +143,7 @@ export default class Schedule extends Component {
         var task = this.state.tasks.filter(task => task._id === id);
         if(task) {
             task[0].active = newActiveState;
-            axios.post('http://localhost:4000/task/update/'+id, task[0])
+            axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/task/update/'+id, task[0])
                 .then(res => console.log(res.data));
         }
     }

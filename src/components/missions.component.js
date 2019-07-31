@@ -25,7 +25,7 @@ export default class Missions extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://localhost:4000/mission/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/')
             .then(response => {
                 this.setState({ missions: response.data });
             })
@@ -35,7 +35,7 @@ export default class Missions extends Component {
     }
 
     componentDidUpdate() {
-        axios.get('http://localhost:4000/mission/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/')
             .then(response => {
                 if (this.state.missions.length !== response.data.length) {
                     this.setState({ missions: response.data });
@@ -47,7 +47,7 @@ export default class Missions extends Component {
     }
 
     deleteItem(id) {
-        axios.post('http://localhost:4000/mission/delete/' + id)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/delete/' + id)
             .then(response => {
                 this.setState({
                     missions: this.state.missions.filter(mission => mission._id !== id)

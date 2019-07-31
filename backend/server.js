@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const exec = require('child_process').exec;
 const later = require('later');
+const moment = require('moment')
 const waypointRoutes = express.Router();
 const missionRoutes = express.Router();
 const logmissionRoutes = express.Router();
@@ -167,6 +168,36 @@ logmissionRoutes.route('/').get(function(req, res) {
 logmissionRoutes.route('/last/:mode').get(function(req, res) {
     LogMission.findOne(
         { mode: req.params.mode },
+        function(err, logmission) {
+            if (err) {
+                console.log(err);
+            } else {
+                res.json(logmission);
+        }
+    })
+    .sort('-start_time')
+    .populate({ path: 'mission_id', populate: { path: 'path' } })
+    .populate('data.waypoint')
+    .populate({ path: 'data.input', populate: { path: 'items.item' } });
+});
+
+logmissionRoutes.route('/date/:date').get(function(req, res) {
+    var date = moment.utc(moment(req.params.date, "YYYY-MM-DD"));
+    var start = date.startOf('day').toDate();
+    var end = date.endOf('day').toDate();
+    console.log(start, end)
+    LogMission.find({
+        $and: [
+            {
+                $or: [
+                    { end_time: { $gte: start } },
+                    { start_time: { $lte: end } }
+                ]
+            },
+            {
+                mode: { $in: ['patrol', 'assistance'] }
+            }
+        ]},
         function(err, logmission) {
             if (err) {
                 console.log(err);

@@ -59,7 +59,7 @@ class AssistanceScreen extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://localhost:4000/logmission/last/assistance')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/logmission/last/assistance')
             .then(response => {
                 if (response.data !== null) {
                     let traveled_waypoints = response.data.data;
@@ -130,9 +130,6 @@ class AssistanceScreen extends Component {
                             </div>
                         </div>
                     </div>
-                    
-                    
-                    
                 </div>
             </div>
         )

@@ -60,7 +60,7 @@ export default  class CreateWaypoints extends Component {
             group: this.state.group
         };
 
-        axios.post('http://localhost:4000/waypoint/add', newWaypoint)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/add', newWaypoint)
             .then(res => console.log(res.data));
 
         this.setState({
@@ -73,7 +73,7 @@ export default  class CreateWaypoints extends Component {
         this.props.history.push('/waypoints');
     }
 
-    onCancel = (e: Object) => {
+    onCancel = (e) => {
         console.log(`Cancel submitted:`);
 
         this.setState({
@@ -86,7 +86,7 @@ export default  class CreateWaypoints extends Component {
         this.props.history.push('/waypoints');
     }
 
-    addMarker = (e: Object) => {
+    addMarker = (e) => {
         this.setState({
           point: [(0.05*e.latlng.lng).toFixed(2), (0.05*e.latlng.lat).toFixed(2), (0.0).toFixed(2)]
         })

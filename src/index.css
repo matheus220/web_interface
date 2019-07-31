@@ -445,3 +445,19 @@ code {
   margin: 3px 0px;
   min-width: 23%;
 }
+
+.vis-item {
+  cursor: pointer;
+}
+
+.vis-item.red {
+  color: white;
+  background-color: red;
+  border-color: darkred;
+}
+
+.vis-item.green {
+  color: white;
+  background-color: green;
+  border-color: darkgreen;
+}

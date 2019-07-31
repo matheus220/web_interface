@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import ImageGallery from 'react-image-gallery';
 import ROSLIB from 'roslib';
-import DropdownList from 'react-widgets/lib/DropdownList'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import MapWaypoints from "./map.component";
 import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
@@ -23,17 +21,6 @@ export default class Navigation extends Component {
         ]
         this.defaultCameras = ['bass_camera', 'middle_camera', 'top_camera']
 
-        this.modeMapping = [
-            "UNDEFINED",
-            "PATROL",
-            "TELEOPERATION",
-            "SEMI AUTONOMOUS",
-            "NOT CHARGING",
-            "GOING RECHARGE",
-            "DOCKING",
-            "DOCKED"
-        ]
-
         this.state = {
             logmission: {},
             map_waypoints: [],
@@ -44,21 +31,13 @@ export default class Navigation extends Component {
             current_index: 0,
             timestamp: [],
             real_time: true,
-            currentMode: "UNDEFINED",
-            battery: "-- ",
-            changeModeTo: "",
-            changeToPatrol: null,
-            missions: []
+            currentMode: "UNDEFINED"
         };
 
         this.onMarkerClick = this.onMarkerClick.bind(this);
         this.toggleRealTime = this.toggleRealTime.bind(this);
         this.onSlide = this.onSlide.bind(this);
         this._mode_callback = this._mode_callback.bind(this);
-        this._battery_callback = this._battery_callback.bind(this);
-        this.changeMode = this.changeMode.bind(this);
-        this.toggleModal = this.toggleModal.bind(this);
-        this.requestModeChange = this.requestModeChange.bind(this);
         this.fetchData = this.fetchData.bind(this);
         
         let robot_IP = "192.168.1.96";
@@ -74,23 +53,7 @@ export default class Navigation extends Component {
             throttle_rate : 1
         });
 
-        this.batteryListener = new ROSLIB.Topic({
-            ros : ros,
-            name : '/npb/power_info',
-            messageType : 'npb/MsgPowerInfo',
-            throttle_rate : 1
-        });
-
-        this.changeModePublisher = new ROSLIB.Topic({
-            ros : ros,
-            name : '/change_mode',
-            messageType : 'std_msgs/String',
-            throttle_rate : 100
-        });
-
         this.currentModeListener.subscribe(this._mode_callback);
-        this.batteryListener.subscribe(this._battery_callback);
-        this.changeModePublisher.advertise();
     }
 
     _mode_callback (currentMode) {
@@ -102,16 +65,8 @@ export default class Navigation extends Component {
         }
     }
 
-    _battery_callback (level) {
-        if (level.batt_soc !== this.state.battery) {
-            this.setState({
-                battery: level.batt_soc
-            });
-        }
-    }
-
     fetchData() {
-        axios.get('http://localhost:4000/logmission/last/patrol')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/logmission/last/patrol')
             .then(response => {
                 if (response.data !== this.state.logmission) {
                     let mission_waypoints = response.data.mission_id.path;
@@ -149,9 +104,8 @@ export default class Navigation extends Component {
             .catch(function (error){
                 console.log(error);
             })
-        axios.get('http://localhost:4000/log/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/log/')
             .then(response => {
-                console.log("entrou_")
                 if(response.data.length) {
                     if(this.state.logs.length) {
                         if(response.data[0]._id !== this.state.logs[0]._id) {
@@ -169,23 +123,12 @@ export default class Navigation extends Component {
 
     componentDidMount() {
         this.fetchData();
-        axios.get('http://localhost:4000/mission/')
-            .then(response => {
-                if(response.data.length !== this.state.missions.length) {
-                    this.setState({ missions: response.data});
-                }
-            })
-            .catch(function (error){
-                console.log(error);
-            })
         this.interval = setInterval(() => this.fetchData(), 5000);
     }
 
     componentWillUnmount() {
         clearInterval(this.interval);
         this.currentModeListener.unsubscribe(this._mode_callback);
-        this.batteryListener.unsubscribe(this._battery_callback);
-        this.changeModePublisher.unadvertise();
     }
 
     onMarkerClick(e) {
@@ -209,52 +152,6 @@ export default class Navigation extends Component {
                 waypointName: waypoint.name
             });
         }
-    }
-
-    requestModeChange(){
-        var stringMessage = new ROSLIB.Message({
-            data: ""
-        });
-        var date = new Date().toISOString();
-        
-        switch (this.state.changeModeTo) {
-            case 'patrol':
-                if(this.state.changeToPatrol) {
-                    stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"patrol\", \"mission_id\": \"" + this.state.changeToPatrol + "\"}"; 
-                }
-                break;
-            case 'assistance':
-                stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"assistance\"}";
-                break;
-            case 'recharge':
-                stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"recharge\"}";
-                break;
-            case 'stop':
-                stringMessage.data = "{\"timestamp\": \"" + date + "\", \"mode\": \"stop\"}";
-                break;
-            default:
-                console.log("No mode chosen")
-        }
-        if(stringMessage.data !== "") {
-            this.changeModePublisher.publish(stringMessage)
-            this.toggleModal();
-        }
-        
-    }
-
-    changeMode(mode) {
-        this.setState(prevState => ({
-            modal: !prevState.modal,
-            changeModeTo: mode
-        }));
-    }
-
-    toggleModal() {
-        this.setState(prevState => ({
-            modal: !prevState.modal,
-            changeModeTo: "",
-            changeToPatrol: ""
-        }));
     }
 
     toggleRealTime() {
@@ -310,18 +207,8 @@ export default class Navigation extends Component {
             }
         }
 
-        let critical_battery = this.state.battery < 30;
-
         return (
             <div className="row">
-                <div className="currentState">
-                    <button type="button" className="btn btn-light">{this.state.currentMode}</button>
-                    {critical_battery ? 
-                        <button type="button" className="btn btn-danger">{this.state.battery}%</button> :
-                        <button type="button" className="btn btn-success">{this.state.battery}%</button>
-                    }
-                    
-                </div>
                 <div className="col-md-12 col-xl-6">
                     <div className="card">
                         {has_mission ? 
@@ -340,38 +227,6 @@ export default class Navigation extends Component {
                             <MapWaypoints waypoints={this.state.map_waypoints} robotPose={true} onMarkerClick={this.onMarkerClick} showPath={true} height={"80.9vh"}/>
                         </div>
                     </div>
-                    <div className="card" style={{marginTop: "20px"}}>
-                        <div className="card-header">
-                            <h5>Change mode</h5>
-                        </div>
-                        <div className="card-block change-mode-card" style={{paddingTop: "5px"}}>
-                            <div className="d-flex justify-content-between">
-                                <button type="button" className="btn btn-primary" onClick={()=>this.changeMode("patrol")}>Patrol</button>
-                                <button type="button" className="btn btn-warning" onClick={()=>this.changeMode("assistance")}>Assistance</button>
-                                <button type="button" className="btn btn-success" onClick={()=>this.changeMode("recharge")}>Recharge</button>
-                                <button type="button" className="btn btn-danger" onClick={()=>this.changeMode("stop")}>Stop</button>
-                            </div>
-                        </div>
-                    </div>
-                    <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
-                        <ModalHeader toggle={this.toggle}>Switch to {this.state.changeModeTo} mode</ModalHeader>
-                        {this.state.changeModeTo === "patrol" ?
-                        <ModalBody>
-                            <DropdownList
-                                filter={(item, searchTerm) => item.name.indexOf(searchTerm) > -1}
-                                data={this.state.missions}
-                                textField='name'
-                                valueField='_id'
-                                onChange={changeToPatrol => this.setState({changeToPatrol: changeToPatrol._id})}
-                                placeholder="Choose the mission to be performed"
-                            />
-                        </ModalBody> :
-                        null }
-                        <ModalFooter>
-                            <Button color="primary" onClick={this.requestModeChange}>Yes</Button>{' '}
-                            <Button color="secondary" onClick={this.toggleModal}>No</Button>
-                        </ModalFooter>
-                    </Modal>
                 </div>
                 <div  className="col-md-12 col-xl-6">
                     <div className="card">

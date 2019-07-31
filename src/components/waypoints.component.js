@@ -21,7 +21,7 @@ export default class Waypoints extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://localhost:4000/waypoint/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/')
             .then(response => {
                 this.setState({ waypoints: response.data });
             })
@@ -31,7 +31,7 @@ export default class Waypoints extends Component {
     }
 
     componentDidUpdate() {
-        axios.get('http://localhost:4000/waypoint/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/')
             .then(response => {
                 if (this.state.waypoints.length !== response.data.length) {
                     this.setState({ waypoints: response.data });
@@ -43,7 +43,7 @@ export default class Waypoints extends Component {
     }
 
     deleteItem(id) {
-        axios.post('http://localhost:4000/waypoint/delete/' + id)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/delete/' + id)
             .then(response => {
                 this.setState({
                     waypoints: this.state.waypoints.filter(wp => wp._id !== id)
