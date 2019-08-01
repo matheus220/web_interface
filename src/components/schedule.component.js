@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Modal } from 'react-bootstrap';
 import cronstrue from 'cronstrue';
 import DropdownList from 'react-widgets/lib/DropdownList'
 import axios from 'axios';
@@ -161,7 +161,9 @@ export default class Schedule extends Component {
                         <div className="card-header">
                             <h5>Task List</h5>
                             <div className="card-header-right">
-                                <Button color="success" onClick={this.toggleModal}>+</Button>
+                                <button onClick={this.toggleModal} type="button" className="btn btn-success">
+                                    +
+                                </button>
                             </div>
                         </div>
                         <div className="card-block" style={{minHeight: "550px"}}>
@@ -184,9 +186,11 @@ export default class Schedule extends Component {
                         </div>
                     </div>
                 </div>
-                <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
-                    <ModalHeader toggle={this.toggle}>Schedule new task</ModalHeader>
-                    <ModalBody>
+                <Modal show={this.state.modal} onHide={this.toggleModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Schedule new task</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
                         <div>
                             <div>
                                 <Cron onCronChange={this.onChangeCronExpression}/>
@@ -205,11 +209,11 @@ export default class Schedule extends Component {
                                 placeholder="Choose a mission"
                             />
                         </div>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="primary" onClick={this.onSubmit}>Save</Button>{' '}
-                        <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
-                    </ModalFooter>
+                    </Modal.Body> 
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={this.toggleModal}>Cancel</Button>{' '}
+                        <Button variant="success" onClick={this.onSubmit}>Save</Button>
+                    </Modal.Footer>
                 </Modal>
             </div>
         )

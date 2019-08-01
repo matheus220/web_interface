@@ -85,9 +85,6 @@ let LogMission = new Schema({
     current_waypoint: {
         type: Number
     },
-    scheduled: {
-        type: Boolean
-    },
     data: [{
         waypoint: {
             type: Schema.Types.ObjectId,

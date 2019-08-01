@@ -13,6 +13,24 @@ code {
     monospace;
 }
 
+@media (min-width: 768px){
+  .card {
+    margin-bottom: 25px!important;
+  }
+}
+
+@media (min-width: 576px){
+  .card {
+    margin-bottom: 25px!important;
+  }
+}
+
+@media (max-width: 576px){
+  .card {
+    margin-bottom: 25px!important;
+  }
+}
+
 .completed {
   text-decoration: line-through;
 }
@@ -450,14 +468,27 @@ code {
   cursor: pointer;
 }
 
-.vis-item.red {
-  color: white;
-  background-color: red;
-  border-color: darkred;
+.vis-timeline {
+  border: 2px solid purple;
+  font-family:  purisa, 'comic sans', cursive;
+  font-size: 12pt;
+  color: #555;
+  background: #F6F6F6;
 }
 
-.vis-item.green {
+.vis-item.patrol {
   color: white;
-  background-color: green;
-  border-color: darkgreen;
+  background-color: lightcoral;
+  border-color: red;
+}
+
+.vis-item.assistance {
+  color: white;
+  background-color: lightgreen;
+  border-color: green;
+}
+
+.vis-item.vis-selected {
+  border-color: darkblue!important;
+  background-color: lightblue!important;
 }

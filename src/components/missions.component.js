@@ -100,9 +100,9 @@ export default class Missions extends Component {
                         </div>
                     </div>
                 </div>
-                <div  className="col-md-12 col-xl-3">
-                    <div className="card">
-                    <div className="card-header">
+                <div  className="col-md-12 col-xl-3 d-flex" style={{minHeight: "500px"}}>
+                    <div className="card flex-grow-1">
+                        <div className="card-header">
                             <h5>Missions</h5>
                             <div className="card-header-right">
                                 <Link to="/create_mission">
@@ -112,14 +112,18 @@ export default class Missions extends Component {
                                 </Link>
                             </div>
                         </div>
-                        <div className="card-block" style={{paddingTop: 0 + 'px'}}>
-                            <input type="text" className="input-todo" placeholder="Search Mission" onChange={this.updateSearch} value={this.state.search} />
-                            <Scrollbars autoHide style={{ width: "100%", height: "65.5vh" }}>
-                            {missions.length ? 
-                                <ul>
-                                    {missions}
-                                </ul> : <h4 style={{textAlign: "center", marginTop: "10px", color: "#cdcdcd"}}>No Mission found</h4>}
-                            </Scrollbars>
+                        <div className="card-block flex-grow-1" style={{paddingTop: 0 + 'px'}}>
+                            <div className="d-flex flex-column" style={{height: "100%"}}>
+                                <input type="text" className="input-todo" placeholder="Search Mission" onChange={this.updateSearch} value={this.state.search} />
+                                <div className="flex-grow-1">
+                                    <Scrollbars autoHide style={{ width: "100%", height: "100%" }}>
+                                    {missions.length ? 
+                                        <ul>
+                                            {missions}
+                                        </ul> : <h4 style={{textAlign: "center", marginTop: "10px", color: "#cdcdcd"}}>No Mission found</h4>}
+                                    </Scrollbars>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -116,7 +116,7 @@ export default class CreateMission extends Component {
         }
     }
 
-    onCancel = (e: Object) => {
+    onCancel = (e) => {
         console.log(`Cancel submitted:`);
 
         this.setState({
@@ -149,7 +149,7 @@ export default class CreateMission extends Component {
                         </div>
                     </div>
                 </div>
-                <div  className="col-md-12 col-xl-3">
+                <div  className="col-md-12 col-xl-3 d-flex">
                     <div className="card">
                         <div className="card-header">
                             <h5>Create Mission</h5>

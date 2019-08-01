@@ -74,8 +74,8 @@ export default class Waypoints extends Component {
                         </div>
                     </div>
                 </div>
-                <div  className="col-md-12 col-xl-3">
-                    <div className="card">
+                <div  className="col-md-12 col-xl-3 d-flex" style={{minHeight: "500px"}}>
+                    <div className="card flex-grow-1">
                         <div className="card-header">
                             <h5>Waypoints</h5>
                             <div className="card-header-right">
@@ -86,14 +86,18 @@ export default class Waypoints extends Component {
                                 </Link>
                             </div>
                         </div>
-                        <div className="card-block" style={{paddingTop: 0 + 'px'}}>
-                            <input type="text" className="input-todo" placeholder="Search Waypoint" onChange={this.updateSearch} value={this.state.search} />
-                            <Scrollbars autoHide style={{ width: "100%", height: "65.5vh" }}>
-                                {waypoint.length ? 
-                                <ul>
-                                    {waypoint}
-                                </ul> : <h4 style={{textAlign: "center", marginTop: "10px", color: "#cdcdcd"}}>No Waypoint found</h4>}
-                            </Scrollbars>
+                        <div className="card-block flex-grow-1" style={{paddingTop: 0 + 'px'}}>
+                            <div className="d-flex flex-column" style={{height: "100%"}}>
+                                <input type="text" className="input-todo" placeholder="Search Waypoint" onChange={this.updateSearch} value={this.state.search} />
+                                <div className="flex-grow-1">
+                                    <Scrollbars autoHide style={{ width: "100%", height: "65.5vh" }}>
+                                        {waypoint.length ? 
+                                        <ul>
+                                            {waypoint}
+                                        </ul> : <h4 style={{textAlign: "center", marginTop: "10px", color: "#cdcdcd"}}>No Waypoint found</h4>}
+                                    </Scrollbars>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
