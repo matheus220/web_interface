@@ -231,7 +231,7 @@ export default class Navigation extends Component {
                         </div>
                     </div>
                 </div>
-                <div  className="col-md-12 col-xl-6">
+                <div  className="col-md-12 col-xl-6 d-flex flex-column">
                     <div className="card">
                         {this.state.real_time ?
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
@@ -257,15 +257,15 @@ export default class Navigation extends Component {
                             <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
-                    <div className="card latest-update-card" style={{marginTop: "20px"}}>
+                    <div className="card latest-update-card flex-grow-1">
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
                             <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
                                 <h5>Latest Activity</h5>
                             </div>
                         </div>
-                        <div className="card-block" style={{paddingTop: "0px"}}>
+                        <div className="card-block flex-grow-1" style={{paddingTop: "0px"}}>
                             {logs.length ?
-                            <Scrollbars autoHide style={{ width: "auto", height: "220px" }}>
+                            <Scrollbars autoHide style={{ width: "100%", height: "100%" }}>
                                 <div className="latest-update-box">
                                     {logs}
                                 </div>
