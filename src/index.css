@@ -29,6 +29,15 @@ code {
   .card {
     margin-bottom: 25px!important;
   }
+  .page-wrapper {
+    padding: .3rem 0.4rem!important;
+  }
+  .card .card-header {
+    padding: 10px!important;
+  }
+  .card .card-block {
+    padding: 0.8rem!important;
+  }
 }
 
 .completed {

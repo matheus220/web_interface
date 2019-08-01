@@ -3,6 +3,7 @@ import { Button, Modal } from 'react-bootstrap';
 import cronstrue from 'cronstrue';
 import DropdownList from 'react-widgets/lib/DropdownList'
 import axios from 'axios';
+import { Scrollbars } from 'react-custom-scrollbars';
 import Cron from "./cron-generator.component";
 import 'react-widgets/dist/css/react-widgets.css';
 
@@ -166,23 +167,27 @@ export default class Schedule extends Component {
                                 </button>
                             </div>
                         </div>
-                        <div className="card-block" style={{minHeight: "550px"}}>
-                            <table className="table table-striped table-bordered table-tasks" style={{width: "100%"}} >
-                                <thead>
-                                    <tr>
-                                        <th style={{textAlign: "center"}}>Creation date</th>
-                                        <th style={{textAlign: "center"}}>Mission</th>
-                                        <th style={{textAlign: "center"}}>Schedule</th>
-                                        <th style={{textAlign: "center"}}>Previous</th>
-                                        <th style={{textAlign: "center"}}>Next</th>
-                                        <th style={{textAlign: "center"}}>Active</th>
-                                        <th style={{textAlign: "center"}}>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    { this.taskList() }
-                                </tbody>
-                            </table>
+                        <div className="card-block" style={{height:"80vh", minHeight: "550px"}}>
+                            <Scrollbars autoHide style={{ width: "100%", height: "100%" }}>
+                                <table className="table table-striped table-bordered table-tasks" style={{width: "100%"}} >
+                                    <thead>
+                                        <tr>
+                                            <th style={{textAlign: "center"}}>Creation date</th>
+                                            <th style={{textAlign: "center"}}>Mission</th>
+                                            <th style={{textAlign: "center"}}>Schedule</th>
+                                            <th style={{textAlign: "center"}}>Previous</th>
+                                            <th style={{textAlign: "center"}}>Next</th>
+                                            <th style={{textAlign: "center"}}>Active</th>
+                                            <th style={{textAlign: "center"}}>Action</th>
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        { this.taskList() }
+                                    </tbody>
+                                    
+                                </table>
+                            </Scrollbars>
                         </div>
                     </div>
                 </div>

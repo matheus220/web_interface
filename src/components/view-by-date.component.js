@@ -39,6 +39,9 @@ export default class ViewByDate extends Component {
                     minute: 'H:mm',
                     hour: 'H'
                 }
+            },
+            moment: function(date) {
+                return Moment(date).utc();
             }
         }
 
@@ -51,6 +54,7 @@ export default class ViewByDate extends Component {
             mapWaypoints: [],
             images: [{original: "/error.jpg"}],
             cameras: ["No waypoints selected"],
+            currentCameraIndex: 0,
             timestamp: null,
             waypointName: null
         };
@@ -60,6 +64,7 @@ export default class ViewByDate extends Component {
         this.selectHandler = this.selectHandler.bind(this);
         this.onMarkerClick = this.onMarkerClick.bind(this);
         this.resetAll = this.resetAll.bind(this);
+        this.onSlide = this.onSlide.bind(this);
     }
 
     fetchLogMissions() {
@@ -68,6 +73,7 @@ export default class ViewByDate extends Component {
             .then(response => {
                 var start = Moment(date.startOf('day').toDate());
                 var end = Moment(date.endOf('day').toDate());
+
                 var min = null;
                 var max = null;
 
@@ -79,8 +85,11 @@ export default class ViewByDate extends Component {
                     max = end;
                 }
 
-                var timelineMin = start.isBefore(min) ? start : min;
-                var timelineMax = end.isAfter(max) ? end : max;
+                var timelineMin_ = start.isBefore(min) ? start : min;
+                var timelineMax_ = end.isAfter(max) ? end : max;
+
+                var timelineMin = Moment(timelineMin_).format("YYYY-MM-DDTHH:mm:ss.SSSS");
+                var timelineMax = Moment(timelineMax_).format("YYYY-MM-DDTHH:mm:ss.SSSS");
 
                 var items = this.logMissionsList(response.data);
 
@@ -89,9 +98,9 @@ export default class ViewByDate extends Component {
                     items: items,
                     options: {
                         ...prevState.options,
-                        min: timelineMin.toDate(),
-                        max: timelineMax.toDate(),
-                        start: timelineMin.toDate(),
+                        min: Moment.utc(timelineMin),
+                        max: Moment.utc(timelineMax),
+                        start: Moment.utc(timelineMin),
                     }
                 }));
                 this.resetAll();
@@ -106,8 +115,8 @@ export default class ViewByDate extends Component {
     }
 
     selectHandler(props) {
+        this.resetAll();
         if(props.items.length) {
-            this.resetAll();
             var selectedMission = this.state.logmissions.filter(logmission => logmission._id === props.items[0])[0]
             var mapWaypoints = [];
             if (selectedMission.mode === 'patrol') {
@@ -134,41 +143,34 @@ export default class ViewByDate extends Component {
                             waypoint.images = traveledWaypoints[index].input.items.filter(item => {
                                 return(item.model === "Camera")
                             }).map(item => {
-                                return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": waypoint.input.timestamp});
+                                return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": traveledWaypoints[index].input.timestamp});
                             });
+                        } else {
+                            waypoint.icon = 2;
                         }
                     }
                     return(waypoint);
                 })
             } else {
                 let traveledWaypoints = selectedMission.data;
-                mapWaypoints = traveledWaypoints.map(waypoint => {
-                    switch (waypoint.status) {
-                        case 'succeeded':
-                            waypoint.icon = 1;
-                            break;
-                        case 'active':
-                            waypoint.icon = 3;
-                            break;
-                        case 'aborted':
-                            waypoint.icon = 2;
-                            break;
-                        default:
-                            waypoint.icon = 5;
-                    }
-                    if(waypoint.hasOwnProperty('input')) {
-                        waypoint.images = waypoint.input.items.filter(item => {
+                mapWaypoints = traveledWaypoints.map(data => {
+                    var waypoint = data.unknown_waypoint;
+                    waypoint._id = data.unknown_waypoint.name
+                    if(data.hasOwnProperty('input')) {
+                        waypoint.images = data.input.items.filter(item => {
                             return(item.model === "Camera")
                         }).map(item => {
-                            return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": waypoint.input.timestamp});
+                            return({ "camera_name": item.item.item_name, "image_name": item.item.data.image_name, "path": item.item.data.path, "timestamp": data.input.timestamp});
                         });
+                        waypoint.icon = 1;
+                    } else {
+                        waypoint.icon = 2;
                     }
+                    console.log('Wp', waypoint)
                     return(waypoint);
-                });
+                })
             }
             this.setState({ selectedMission: selectedMission, mapWaypoints: mapWaypoints });
-        } else {
-            this.resetAll();
         }
     }
 
@@ -178,6 +180,7 @@ export default class ViewByDate extends Component {
             mapWaypoints: [],
             images: [{original: "/error.jpg"}],
             cameras: ["No waypoints selected"],
+            currentCameraIndex: 0,
             timestamp: null,
             waypointName: null
         });
@@ -206,26 +209,46 @@ export default class ViewByDate extends Component {
     }
 
     logMissionsList(logmissions) {
+        console.log(logmissions)
         return logmissions.map(logmission => {
             return({
                 id: logmission._id,
-                start: new Date(logmission.start_time),
-                end: new Date(logmission.end_time),
+                start: Moment(logmission.start_time),
+                end: Moment(logmission.end_time),
                 className: logmission.mode
             })
+        });
+    }
+
+    onSlide(currentIndex) {
+        this.setState({
+            currentCameraIndex: currentIndex
         });
     }
 
     render() {
         let loaded = this.state.items !== null;
         let selected = this.state.selectedMission !== null;
+        let missionName = "Assistance";
+        if (selected) {
+            let selectedMission = this.state.selectedMission;
+            if (selectedMission.mode === 'patrol') {
+                missionName = selectedMission.mission_id.name
+            }
+        }
         return (
             <div className="row">
                 <div className="col-md-12 col-xl-12">
-                    <div className="card" style={{marginBottom: "20px"}}>
+                    <div className="card" style={{marginBottom: "30px"}}>
                         <div className="card-header">
-                            {selected ? <h5>Matheus</h5> : <h5>Gabi</h5>}
-                            <div className="card-header-right-text" style={{paddingTop: "10px", maxWidth: "200px"}}>
+                            {selected ?
+                            <div className="title-div">
+                                <h5>{missionName}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}> {this.state.selectedMission.status.toUpperCase()}</span><br/>
+                                <span className="caption-text" >Made from {Moment(this.state.selectedMission.start_time).format("HH:mm")} to {Moment(this.state.selectedMission.end_time).format("HH:mm")} </span>
+                            </div> : 
+                            <h5>No missions selected</h5>
+                            }
+                            <div className="card-header-right-text" style={{paddingTop: "18px", maxWidth: "200px"}}>
                                 <DateTimePicker
                                     format='LL'
                                     max={new Date()}
@@ -244,16 +267,25 @@ export default class ViewByDate extends Component {
                 <div className="col-md-12 col-xl-6">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints waypoints={this.state.mapWaypoints} robotPose={false} onMarkerClick={this.onMarkerClick} showPath={false} height={"59vh"}/>
+                            <MapWaypoints waypoints={this.state.mapWaypoints} robotPose={false} onMarkerClick={this.onMarkerClick} showPath={false} height={"54.5vh"}/>
                         </div>
                     </div>
                 </div>
                 <div  className="col-md-12 col-xl-6">
                     <div className="card">
+                        { this.state.waypointName ?
                         <div className="card-header">
-                            <h5>Title</h5>
+                            <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
+                            <span className="caption-text">Photo taken at {this.state.timestamp[this.state.currentCameraIndex]}</span>
+                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
+
+                            </div>
+                        </div> :
+                        <div className="card-header">
+                            <h5>{this.state.cameras[this.state.currentCameraIndex]}</h5>
                         </div>
-                        <div className="card-block" style={{paddingTop: "5px", minHeight: "400px"}}>
+                        }
+                        <div className="card-block" style={{minHeight: "400px"}}>
                             <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>

@@ -96,7 +96,7 @@ export default class Missions extends Component {
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints waypoints={this.state.selected_mission.path} showPath={true} />
+                            <MapWaypoints waypoints={this.state.selected_mission.path} showPopup={true} showPath={true} />
                         </div>
                     </div>
                 </div>

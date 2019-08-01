@@ -90,7 +90,7 @@ export default class Waypoints extends Component {
                             <div className="d-flex flex-column" style={{height: "100%"}}>
                                 <input type="text" className="input-todo" placeholder="Search Waypoint" onChange={this.updateSearch} value={this.state.search} />
                                 <div className="flex-grow-1">
-                                    <Scrollbars autoHide style={{ width: "100%", height: "65.5vh" }}>
+                                    <Scrollbars autoHide style={{ width: "100%", height: "100%" }}>
                                         {waypoint.length ? 
                                         <ul>
                                             {waypoint}

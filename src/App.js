@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Switch, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, NavLink, Redirect } from 'react-router-dom';
 import { Navbar, Nav, NavDropdown, Button, NavItem, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import ROSLIB from 'roslib';
@@ -31,15 +31,19 @@ export default class App extends Component {
 
         this.state = {
             currentMode: "UNDEFINED",
-            battery: "",
+            battery: "--",
             show: false,
             changeModeTo: "",
             changeToPatrol: "",
-            missions: []
+            missions: [],
+            redirect: false
         };
 
         this.handleClose = this.handleClose.bind(this);
         this.requestModeChange = this.requestModeChange.bind(this);
+        this._mode_callback = this._mode_callback.bind(this);
+        this._battery_callback = this._battery_callback.bind(this);
+        this.renderRedirect = this.renderRedirect.bind(this);
 
         let robot_IP = process.env.REACT_APP_ROS_MASTER_IP;
 
@@ -77,7 +81,7 @@ export default class App extends Component {
         if (currentMode.data !== this.state.currentMode) {
             this.setState({currentMode: currentMode.data});
             if (currentMode.data === "TELEOPERATION") {
-                this.props.history.push('/assistance');
+                this.setState({redirect: true});
             }
         }
     }
@@ -145,8 +149,16 @@ export default class App extends Component {
             changeToPatrol: ""
         });
     }
+
+    renderRedirect = () => {
+        if (this.state.redirect) {
+        this.setState({redirect: false});
+          return <Redirect to='/assistance' />
+        }
+    }
     
     render() {
+        var on_assistance = this.state.currentMode === 'TELEOPERATION';
         return (
             <Router>
                 <div className="pcoded-wrapper">
@@ -168,6 +180,11 @@ export default class App extends Component {
                                 <NavItem>
                                     <NavLink exact to="/" className="nav-link" activeClassName="active">Navigation</NavLink>
                                 </NavItem>
+                                {on_assistance ?
+                                <NavItem>
+                                    <NavLink to="/assistance" className="nav-link" activeClassName="active">Assistance</NavLink>
+                                </NavItem> :
+                                null }
                                 <NavItem>
                                     <NavLink to="/waypoints" className="nav-link">Waypoints</NavLink>
                                 </NavItem>
@@ -189,8 +206,8 @@ export default class App extends Component {
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item onClick={()=>this.setState({show: true, changeModeTo: "stop"})}>Stop</NavDropdown.Item>
                                 </NavDropdown>
-                                <Button style={{marginLeft: "10px", borderRadius: "10px"}} variant="light">UNDEFINED</Button>
-                                <Button style={{marginLeft: "10px", borderRadius: "10px"}} variant="success">100%</Button>
+                                <Button style={{marginLeft: "10px", borderRadius: "10px"}} variant="light">{this.state.currentMode}</Button>
+                                <Button style={{marginLeft: "10px", borderRadius: "10px"}} variant="success">{this.state.battery}%</Button>
                             </Nav>
                         </Navbar.Collapse>
                     </Navbar>
@@ -219,6 +236,7 @@ export default class App extends Component {
                         <div className="main-bodyt">
                             <div className="page-wrapper">
                                 <div className="page-body">
+                                    {this.renderRedirect()}
                                     <Switch>
                                         <Route path="/" exact component={Navigation} />
                                         <Route path="/edit/:id" component={EditTodo} />

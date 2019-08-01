@@ -17,6 +17,7 @@
     "react-leaflet": "^2.4.0",
     "react-loading": "^2.0.3",
     "react-nipple": "^1.0.1",
+    "react-notifications-component": "^1.1.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "^3.0.1",
     "react-tag-input": "^6.4.0",

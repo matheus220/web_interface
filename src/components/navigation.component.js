@@ -59,9 +59,6 @@ export default class Navigation extends Component {
     _mode_callback (currentMode) {
         if (currentMode.data !== this.state.currentMode) {
             this.setState({currentMode: currentMode.data});
-            if (currentMode.data === "TELEOPERATION") {
-                this.props.history.push('/assistance');
-            }
         }
     }
 

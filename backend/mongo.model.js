@@ -90,6 +90,14 @@ let LogMission = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Waypoint'
         },
+        unknown_waypoint: {
+            name : {
+                type: String,
+            },
+            point: {
+                type: [Number]
+            }
+        },
         status: {
             type: String
         },
