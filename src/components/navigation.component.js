@@ -54,6 +54,8 @@ export default class Navigation extends Component {
         });
 
         this.currentModeListener.subscribe(this._mode_callback);
+
+        this.interval = null;
     }
 
     _mode_callback (currentMode) {
