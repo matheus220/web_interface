@@ -240,15 +240,17 @@ export default class ViewByDate extends Component {
             <div className="row">
                 <div className="col-md-12 col-xl-12">
                     <div className="card" style={{marginBottom: "30px"}}>
-                        <div className="card-header">
-                            {selected ?
-                            <div className="title-div">
-                                <h5>{missionName}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}> {this.state.selectedMission.status.toUpperCase()}</span><br/>
-                                <span className="caption-text" >Made from {Moment(this.state.selectedMission.start_time).format("HH:mm")} to {Moment(this.state.selectedMission.end_time).format("HH:mm")} </span>
-                            </div> : 
-                            <h5>No missions selected</h5>
-                            }
-                            <div className="card-header-right-text" style={{paddingTop: "18px", maxWidth: "200px"}}>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                {selected ?
+                                <div className="title-div">
+                                    <h5>{missionName}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}> {this.state.selectedMission.status.toUpperCase()}</span><br/>
+                                    <span className="caption-text" >Made from {Moment(this.state.selectedMission.start_time).format("HH:mm")} to {Moment(this.state.selectedMission.end_time).format("HH:mm")} </span>
+                                </div> : 
+                                <h5>No missions selected</h5>
+                                }
+                            </div>
+                            <div class="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px", verticalAlign: "center"}}>
                                 <DateTimePicker
                                     format='LL'
                                     max={new Date()}
@@ -273,19 +275,18 @@ export default class ViewByDate extends Component {
                 </div>
                 <div  className="col-md-12 col-xl-6">
                     <div className="card">
-                        { this.state.waypointName ?
-                        <div className="card-header">
-                            <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
-                            <span className="caption-text">Photo taken at {this.state.timestamp[this.state.currentCameraIndex]}</span>
-                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
-
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            { this.state.waypointName ?
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
+                                <span className="caption-text">Photo taken at {this.state.timestamp[this.state.currentCameraIndex]}</span>
+                            </div> :
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>{this.state.cameras[this.state.currentCameraIndex]}</h5>
                             </div>
-                        </div> :
-                        <div className="card-header">
-                            <h5>{this.state.cameras[this.state.currentCameraIndex]}</h5>
+                            }
                         </div>
-                        }
-                        <div className="card-block" style={{minHeight: "400px"}}>
+                        <div className="card-block image-block">
                             <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>

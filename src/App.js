@@ -228,8 +228,8 @@ export default class App extends Component {
                         </Modal.Body> :
                         null }
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={this.requestModeChange}>Yes</Button>
-                            <Button variant="primary" onClick={this.handleClose}>No</Button>
+                            <Button variant="secondary" onClick={this.handleClose}>No</Button>
+                            <Button variant="primary" onClick={this.requestModeChange}>Yes</Button>
                         </Modal.Footer>
                     </Modal>
                     <div className="pcoded-content">

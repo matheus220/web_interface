@@ -251,21 +251,25 @@ class AssistanceScreen extends Component {
                 <div  className="col-md-12 col-xl-6">
                     <div className="card">
                         { this.state.waypointName ?
-                        <div className="card-header">
-                            <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
-                            <span className="caption-text">Photo taken at {this.state.timestamp[this.state.currentCameraIndex]}</span>
-                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
-                                <button type="button" onClick={this.toggleRealTime} className="btn btn-secondary">REAL-TIME</button>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
+                                <span className="caption-text">Photo taken at {this.state.timestamp[this.state.currentCameraIndex]}</span>
+                            </div>
+                            <div class="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
+                                <button type="button" onClick={this.toggleRealTime} className="btn btn-sm btn-secondary">REAL-TIME</button>
                             </div>
                         </div> :
-                        <div className="card-header">
-                            <h5>{this.state.cameras[this.state.currentCameraIndex]}</h5>
-                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
-                                <button type="button" className="btn btn-success">REAL-TIME</button>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>{this.state.cameras[this.state.currentCameraIndex]}</h5>
+                            </div>
+                            <div class="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
+                                <button type="button" className="btn btn-sm btn-success">REAL-TIME</button>
                             </div>
                         </div>
                         }
-                        <div className="card-block" style={{paddingTop: "5px", minHeight: "400px"}}>
+                        <div className="card-block image-block" style={{paddingTop: "5px"}}>
                             <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
@@ -332,11 +336,11 @@ export default class Assistance extends Component {
     }
 
     componentDidMount() {
-        //this.modeCallback("TELEOPERATION");
+        this.modeCallback("TELEOPERATION");
     }
 
     modeCallback(currentMode) {
-        if (currentMode.data === "TELEOPERATION") {
+        if (currentMode === "TELEOPERATION") {
             this.setState({displayLoading: false});
             clearTimeout(this.timer);
         } else {

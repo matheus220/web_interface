@@ -104,8 +104,10 @@ export default  class CreateWaypoints extends Component {
                 </div>
                 <div  className="col-md-12 col-xl-3 d-flex">
                     <div className="card">
-                        <div className="card-header">
-                            <h5>Create Waypoint</h5>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>Create Waypoint</h5>
+                            </div>
                         </div>
                         <div className="card-block">
                             <form onSubmit={this.onSubmit}>

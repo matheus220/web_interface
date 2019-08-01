@@ -211,15 +211,19 @@ export default class Navigation extends Component {
                 <div className="col-md-12 col-xl-6">
                     <div className="card">
                         {has_mission ? 
-                        <div className="card-header">
-                            <h5>{title}</h5>
-                            <div className="card-header-right-text">
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>{title}</h5>
+                            </div>
+                            <div class="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 {this.state.logmission.mission_id ? <strong>Mission {this.state.logmission.mission_id.name}</strong> : ""}<br/>
-                                {mission_time_info}
+                                <span className="caption-text">{mission_time_info}</span>
                             </div>
                         </div> :
-                        <div className="card-header">
-                            <h5>No missions performed</h5>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>No missions performed</h5>
+                            </div>
                         </div>
                         }
                         <div className="card-block" style={{paddingTop: "5px"}}>
@@ -230,27 +234,34 @@ export default class Navigation extends Component {
                 <div  className="col-md-12 col-xl-6">
                     <div className="card">
                         {this.state.real_time ?
-                        <div className="card-header">
-                            <h5>{this.state.cameras[this.state.current_index]}</h5>
-                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
-                                <button type="button" className="btn btn-success">REAL-TIME</button>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>{this.state.cameras[this.state.current_index]}</h5><br/>
+                                <span className="caption-text">Photo taken at </span>
+                            </div>
+                            <div class="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
+                                <button type="button" className="btn btn-sm btn-success">REAL-TIME</button>
                             </div>
                         </div> :
-                        <div className="card-header">
-                            <h5>{this.state.cameras[this.state.current_index]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
-                            <span className="caption-text">Photo taken at {this.state.timestamp[this.state.current_index]}</span>
-                            <div className="card-header-right-text" style={{paddingTop: "7px"}}>
-                                <button type="button" onClick={this.toggleRealTime} className="btn btn-secondary">REAL-TIME</button>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>{this.state.cameras[this.state.current_index]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
+                                <span className="caption-text">Photo taken at {this.state.timestamp[this.state.current_index]}</span>
+                            </div>
+                            <div class="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
+                                <button type="button" onClick={this.toggleRealTime} className="btn btn-sm btn-secondary">REAL-TIME</button>
                             </div>
                         </div>
                         }
-                        <div className="card-block" style={{paddingTop: "5px", minHeight: "400px"}}>
+                        <div className="card-block image-block" style={{paddingTop: "5px"}}>
                             <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
                     <div className="card latest-update-card" style={{marginTop: "20px"}}>
-                        <div className="card-header">
-                            <h5>Latest Activity</h5>
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>Latest Activity</h5>
+                            </div>
                         </div>
                         <div className="card-block" style={{paddingTop: "0px"}}>
                             {logs.length ?

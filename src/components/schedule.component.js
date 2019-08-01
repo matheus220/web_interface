@@ -159,9 +159,11 @@ export default class Schedule extends Component {
             <div className="row">
                 <div  className="col-md-12 col-xl-12">
                     <div className="card">
-                        <div className="card-header">
-                            <h5>Task List</h5>
-                            <div className="card-header-right">
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-6 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>Schedule List</h5>
+                            </div>
+                            <div class="col-6 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <button onClick={this.toggleModal} type="button" className="btn btn-success">
                                     +
                                 </button>
@@ -217,7 +219,7 @@ export default class Schedule extends Component {
                     </Modal.Body> 
                     <Modal.Footer>
                         <Button variant="secondary" onClick={this.toggleModal}>Cancel</Button>{' '}
-                        <Button variant="success" onClick={this.onSubmit}>Save</Button>
+                        <Button variant="primary" onClick={this.onSubmit}>Save</Button>
                     </Modal.Footer>
                 </Modal>
             </div>

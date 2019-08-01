@@ -23,6 +23,9 @@ code {
   .card {
     margin-bottom: 25px!important;
   }
+  .card-block.image-block{
+    min-height: 250px!important;
+  }
 }
 
 @media (max-width: 576px){
@@ -33,10 +36,17 @@ code {
     padding: .3rem 0.4rem!important;
   }
   .card .card-header {
-    padding: 10px!important;
+    padding: 0.8rem!important;
+    height: auto!important;
+  }
+  .card .card-header:after {
+    left: 0.8rem!important;
   }
   .card .card-block {
     padding: 0.8rem!important;
+  }
+  .card-block.image-block{
+    min-height: 200px!important;
   }
 }
 
@@ -73,26 +83,33 @@ code {
   padding: 1.25rem;
 }
 
+.card-block.image-block{
+  min-height: 400px;
+}
+
+
+
 .card .card-header {
   background-color: transparent;
   border-bottom: none;
-  padding: 20px;
+  padding: 10px 1.25rem;
   position: relative;
   margin-bottom: 0;
+  height: 64px;
 }
 
-.card .card-header h5:after {
+.card .card-header:after {
   content: "";
   background-color: #d2d2d2;
-  width: 60px;
+  width: 80px;
   height: 1px;
   position: absolute;
-  bottom: -20px;
-  left: 0;
+  bottom: 3px;
+  left: 1.25rem;
 }
 
 .card .card-header h5 {
-  margin-bottom: 0;
+  margin-bottom: 0px;
   color: #333;
   font-size: 15px;
   font-weight: 700;
@@ -117,12 +134,12 @@ code {
   cursor: pointer;
   border-width: 1px;
   border-style: solid;
-  line-height: 2em;
+  line-height: 1.5em;
   border-radius: 3px;
   border: 0;
   display: inline-block;
   margin: 10px 0;
-  padding: 0.2em 1em;
+  padding: 0em 1em;
   font-size: 1em;
 }
 
@@ -139,12 +156,11 @@ code {
 }
 
 .caption-text {
+  display: block;
   padding: 0px 0;
+  margin-top: -1px;
   color: #7e7e7e;
   font-size: 0.7em;
-  left: 1.25rem;
-  top: 41px;
-  position: absolute;
 }
 
 .currentState {

@@ -66,7 +66,7 @@ export default class Waypoints extends Component {
         );
 
         return (
-            <div className="row listItems">
+            <div className="row">
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
@@ -76,9 +76,11 @@ export default class Waypoints extends Component {
                 </div>
                 <div  className="col-md-12 col-xl-3 d-flex" style={{minHeight: "500px"}}>
                     <div className="card flex-grow-1">
-                        <div className="card-header">
-                            <h5>Waypoints</h5>
-                            <div className="card-header-right">
+                        <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="col-6 col-sm-6" style={{paddingLeft: "0px"}}>
+                                <h5>Waypoints</h5>
+                            </div>
+                            <div class="col-6 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <Link to="/create_waypoint">
                                     <button type="button" className="btn btn-success">
                                         +
@@ -86,7 +88,7 @@ export default class Waypoints extends Component {
                                 </Link>
                             </div>
                         </div>
-                        <div className="card-block flex-grow-1" style={{paddingTop: 0 + 'px'}}>
+                        <div className="card-block flex-grow-1 listItems" style={{paddingTop: 0 + 'px'}}>
                             <div className="d-flex flex-column" style={{height: "100%"}}>
                                 <input type="text" className="input-todo" placeholder="Search Waypoint" onChange={this.updateSearch} value={this.state.search} />
                                 <div className="flex-grow-1">
