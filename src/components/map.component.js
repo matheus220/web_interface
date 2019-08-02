@@ -2,14 +2,13 @@ import React, { Component } from 'react';
 import ROSLIB from 'roslib';
 import { Map, ImageOverlay, Marker, Popup, Polyline } from "react-leaflet";
 import L from 'leaflet';
+import "leaflet-rotatedmarker";
 import PolylineDecorator from "./polyline-decorator.component";
 
 import map from "./../WD_WA_WB.png";
 
-const polyline = [[0, 0], [60, -12], [100,200]];
-
 const arrow = [
-    {offset: '10%', repeat: '40%', symbol: L.Symbol.arrowHead({pixelSize: 12, polygon: false, pathOptions: {opacity:0.8, weight:2, stroke: true, color: '#f00'}})}
+    {offset: "10%", repeat: "10%", symbol: L.Symbol.arrowHead({pixelSize: 12, polygon: false, pathOptions: {opacity:0.8, weight:2, stroke: true, color: '#f00'}})}
 ];
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -46,17 +45,6 @@ var robotPoseIcon = new LeafIcon({
 
 const bounds = [[-396.06, -1771.58], [2103.94, 728.42]]
 
-const ExtendedMarker = props => {
-
-    const openPopup = marker => {
-      if (marker) marker.leafletElement.openPopup();
-    };
-  
-    return (
-      <Marker ref={el => openPopup(el)} {...props}/>
-    );
-};
-
 export default class MapWaypoints extends Component {
 
     constructor(props) {
@@ -76,14 +64,14 @@ export default class MapWaypoints extends Component {
             url: "ws://" + robot_IP + ":9090"
         });
 
-        let poseListener = new ROSLIB.Topic({
+        this.poseListener = new ROSLIB.Topic({
             ros : ros,
             name : '/amcl_pose',
             messageType : 'geometry_msgs/PoseWithCovarianceStamped',
             throttle_rate : 1
         });
 
-        poseListener.subscribe(this._pose_callback);
+        this.poseListener.subscribe(this._pose_callback);
     }
 
     _pose_callback (msg) {
@@ -108,12 +96,17 @@ export default class MapWaypoints extends Component {
         }
     }
 
+    componentWillUnmount() {
+        this.poseListener.unsubscribe(this._pose_callback);
+    }
+
     pointList(waypoints) {
         return waypoints.map((waypoint) => [waypoint.point[1]/0.05, waypoint.point[0]/0.05])
     }
 
     render() {
         let show_robot_pose = this.state.robot_pose !== [9999999.9, 9999999.9, 9999999.9] && this.props.robotPose
+        let showPath = this.props.showPath && this.props.waypoints.length !==0;
         return (
             <div>
                 <Map onClick={this._onMapClick} crs={L.CRS.Simple} zoomDelta={0.3} zoomSnap={0} minZoom={-2.15} maxZoom={2} bounds={bounds} style={{ height: this.props.height ? this.props.height : "80vh", width: "100%", backgroundColor: "#cdcdcd" }}>
@@ -129,9 +122,9 @@ export default class MapWaypoints extends Component {
                         </Marker>
                     )}
                     {show_robot_pose ? 
-                        <Marker icon={robotPoseIcon} position={[this.state.robot_pose[1]/0.05, this.state.robot_pose[0]/0.05]}/> 
+                        <Marker icon={robotPoseIcon} rotationAngle={this.state.robot_pose[2]*180/(2*Math.PI)+22.5} position={[this.state.robot_pose[1]/0.05, this.state.robot_pose[0]/0.05]}/> 
                     : null}
-                    {this.props.showPath ? <PolylineDecorator patterns={arrow} color="red" weight={2.5} opacity={0.8} lineJoin="round" dashArray="10, 10" dashOffset="0" positions={this.pointList(this.props.waypoints)} /> : null}
+                    {showPath ? <Polyline patterns={arrow} color="red" weight={2.5} opacity={0.8} lineJoin="round" dashArray="10, 10" dashOffset="0" positions={this.pointList(this.props.waypoints)} /> : null}
                 </Map>
             </div>
         )

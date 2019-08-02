@@ -77,10 +77,10 @@ export default class Waypoints extends Component {
                 <div  className="col-md-12 col-xl-3 d-flex" style={{minHeight: "500px"}}>
                     <div className="card flex-grow-1">
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
-                            <div class="col-6 col-sm-6" style={{paddingLeft: "0px"}}>
+                            <div className="col-6 col-sm-6" style={{paddingLeft: "0px"}}>
                                 <h5>Waypoints</h5>
                             </div>
-                            <div class="col-6 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
+                            <div className="col-6 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <Link to="/create_waypoint">
                                     <button type="button" className="btn btn-success">
                                         +
