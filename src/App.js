@@ -45,28 +45,26 @@ export default class App extends Component {
         this._battery_callback = this._battery_callback.bind(this);
         this.renderRedirect = this.renderRedirect.bind(this);
 
-        let robot_IP = process.env.REACT_APP_ROS_MASTER_IP;
-
-        let ros = new ROSLIB.Ros({
-            url: "ws://" + robot_IP + ":9090"
+        this.ros = new ROSLIB.Ros({
+            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
         });
 
         this.currentModeListener = new ROSLIB.Topic({
-            ros : ros,
+            ros : this.ros,
             name : '/current_mode',
             messageType : 'std_msgs/String',
             throttle_rate : 1
         });
 
         this.batteryListener = new ROSLIB.Topic({
-            ros : ros,
+            ros : this.ros,
             name : '/npb/power_info',
             messageType : 'npb/MsgPowerInfo',
             throttle_rate : 1
         });
 
         this.changeModePublisher = new ROSLIB.Topic({
-            ros : ros,
+            ros : this.ros,
             name : '/change_mode',
             messageType : 'std_msgs/String',
             throttle_rate : 100
@@ -110,6 +108,7 @@ export default class App extends Component {
         this.currentModeListener.unsubscribe(this._mode_callback);
         this.batteryListener.unsubscribe(this._battery_callback);
         this.changeModePublisher.unadvertise();
+        this.ros.close();
     }
     
     requestModeChange(){

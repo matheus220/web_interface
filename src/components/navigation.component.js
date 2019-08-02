@@ -40,14 +40,12 @@ export default class Navigation extends Component {
         this._mode_callback = this._mode_callback.bind(this);
         this.fetchData = this.fetchData.bind(this);
         
-        let robot_IP = "192.168.1.96";
-
-        let ros = new ROSLIB.Ros({
-            url: "ws://" + robot_IP + ":9090"
+        this.ros = new ROSLIB.Ros({
+            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
         });
 
         this.currentModeListener = new ROSLIB.Topic({
-            ros : ros,
+            ros : this.ros,
             name : '/current_mode',
             messageType : 'std_msgs/String',
             throttle_rate : 1
@@ -128,6 +126,7 @@ export default class Navigation extends Component {
     componentWillUnmount() {
         clearInterval(this.interval);
         this.currentModeListener.unsubscribe(this._mode_callback);
+        this.ros.close();
     }
 
     onMarkerClick(e) {
@@ -215,10 +214,11 @@ export default class Navigation extends Component {
                             <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
                                 <h5>{title}</h5>
                             </div>
-                            <div className="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
-                                {this.state.logmission.mission_id ? <strong>Mission {this.state.logmission.mission_id.name}</strong> : ""}<br/>
+                            {this.state.logmission.mission_id ?
+                            <div className="col-12 col-sm-6" style={{paddingRight: "0px", textAlign:"right"}}>
+                                <h5>Mission {this.state.logmission.mission_id.name}</h5><br/>
                                 <span className="caption-text">{mission_time_info}</span>
-                            </div>
+                            </div> : ""}
                         </div> :
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
                             <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
@@ -237,7 +237,6 @@ export default class Navigation extends Component {
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
                             <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
                                 <h5>{this.state.cameras[this.state.current_index]}</h5><br/>
-                                <span className="caption-text">Photo taken at </span>
                             </div>
                             <div className="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <button type="button" className="btn btn-sm btn-success">REAL-TIME</button>
@@ -245,7 +244,7 @@ export default class Navigation extends Component {
                         </div> :
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
                             <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
-                                <h5>{this.state.cameras[this.state.current_index]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
+                                <h5>{this.state.cameras[this.state.current_index]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}> Waypoint {this.state.waypointName}</span><br/>
                                 <span className="caption-text">Photo taken at {this.state.timestamp[this.state.current_index]}</span>
                             </div>
                             <div className="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
@@ -263,7 +262,7 @@ export default class Navigation extends Component {
                                 <h5>Latest Activity</h5>
                             </div>
                         </div>
-                        <div className="card-block" style={{paddingTop: "0px"}}>
+                        <div className="card-block flex-grow-1" style={{paddingTop: "0px"}}>
                             {logs.length ?
                             <Scrollbars autoHide style={{ width: "100%", height: "100%" }}>
                                 <div className="latest-update-box">

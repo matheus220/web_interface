@@ -66,41 +66,54 @@ class AssistanceScreen extends Component {
             mapWaypoints: [],
             timestamp: null,
             changeControlTo: null,
-            navigateTo: null
+            navigateTo: null,
+            currentMode: null
         };
 
         this.onMarkerClick = this.onMarkerClick.bind(this);
+        this.modeCallback = this.modeCallback.bind(this);
         this.saveData = this.saveData.bind(this);
         this.fetchData = this.fetchData.bind(this);
         this.onSlide = this.onSlide.bind(this);
         this.toggleRealTime = this.toggleRealTime.bind(this);
         this.addNotification = this.addNotification.bind(this);
+        this.requestMovesBase = this.requestMovesBase.bind(this);
         this.notificationDOMRef = React.createRef();
 
-        let robot_IP = process.env.REACT_APP_ROS_MASTER_IP;
-
-        let ros = new ROSLIB.Ros({
-            url: "ws://" + robot_IP + ":9090"
+        this.ros = new ROSLIB.Ros({
+            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
         });
 
         this.changeControlPublisher = new ROSLIB.Topic({
-            ros : ros,
+            ros : this.ros,
             name : '/change_control',
             messageType : 'std_msgs/String',
             throttle_rate : 10
         });
 
         this.saveDataPublisher = new ROSLIB.Topic({
-            ros : ros,
+            ros : this.ros,
             name : '/order_to_save',
             messageType : 'std_msgs/Empty',
             throttle_rate : 10
         });
 
+        this.currentModeListener = new ROSLIB.Topic({
+            ros : this.ros,
+            name : '/current_mode',
+            messageType : 'std_msgs/String',
+            throttle_rate : 1
+        });
+
+        this.currentModeListener.subscribe(this.modeCallback);
         this.changeControlPublisher.advertise();
         this.saveDataPublisher.advertise();
 
         this.timer = null;
+    }
+
+    modeCallback(currentMode) {
+        this.setState({currentMode: currentMode.data})
     }
 
     fetchData() {
@@ -147,6 +160,8 @@ class AssistanceScreen extends Component {
     componentWillUnmount() {
         this.changeControlPublisher.unadvertise();
         this.saveDataPublisher.unadvertise();
+        this.currentModeListener.unsubscribe(this.modeCallback);
+        this.ros.close();
         clearTimeout(this.timer); 
     }
 
@@ -171,6 +186,11 @@ class AssistanceScreen extends Component {
                 currentCameraIndex: 0
             });
         }
+    }
+
+    requestMovesBase(point) {
+        this.setState({changeControlTo:'semi_autonomous' , navigateTo: point});
+        this.requestControlChange();
     }
 
     requestControlChange(){
@@ -198,6 +218,8 @@ class AssistanceScreen extends Component {
         }
         if(stringMessage.data !== "") {
             this.changeControlPublisher.publish(stringMessage)
+            this.setState({changeControlTo:null , navigateTo: null});
+            console.log(stringMessage.data)
         }
     }
 
@@ -228,7 +250,7 @@ class AssistanceScreen extends Component {
     
     saveData() {
         this.saveDataPublisher.publish();
-        this.timer = setTimeout(this.fetchData, 2000); 
+        this.timer = setTimeout(this.fetchData, 1500); 
         this.addNotification();
     }
 
@@ -237,14 +259,16 @@ class AssistanceScreen extends Component {
             currentCameraIndex: currentIndex
         });
     }
-    
+
     render() {
+        let {currentMode} = this.state;
+        let showTeleopButton = currentMode !== null && currentMode !== 'TELEOPERATION';
         return (
             <div className="row">
                 <div className="col-md-12 col-xl-6">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints waypoints={this.state.mapWaypoints} robotPose={true} onMarkerClick={this.onMarkerClick} showPath={false} height={"83vh"}/>
+                            <MapWaypoints waypoints={this.state.mapWaypoints} robotPose={true} onMarkerCreation={this.requestMovesBase} showLastMarkerCreated={true} onMarkerClick={this.onMarkerClick} showPath={false} height={"83vh"}/>
                         </div>
                     </div>
                 </div>
@@ -277,10 +301,10 @@ class AssistanceScreen extends Component {
                         <div className="col-md-12 col-xl-3 d-flex">
                             <div className="card flex-grow-1">
                                 <div className="card-block change-mode-card flex-grow-1 d-flex align-content-between flex-wrap">
-                                    <button type="button" className="btn btn-secondary" onClick={()=>this.setState({changeControlTo: "assisted_teleop"})} style={{width: "100%", height:"60px"}}>Teleoperation</button>
+                                    {showTeleopButton ? <button type="button" className="btn btn-primary" onClick={()=>this.setState({changeControlTo: "assisted_teleop"}, () => this.requestControlChange())} style={{width: "100%", height:"60px"}}>Teleoperation</button> : null}
                                     <ReactNotification ref={this.notificationDOMRef} />
                                     <button type="button" className="btn btn-success" onClick={this.saveData} style={{width: "100%", height:"60px"}}>Save data</button>
-                                    <button type="button" className="btn btn-danger" onClick={()=>this.setState({changeControlTo: "exit"})} style={{width: "100%", height:"60px"}}>Exit</button>
+                                    <button type="button" className="btn btn-danger" onClick={()=>this.setState({changeControlTo: "exit"}, () => this.requestControlChange())} style={{width: "100%", height:"60px"}}>Exit</button>
                                 </div>
                             </div>
                         </div>
@@ -317,14 +341,12 @@ export default class Assistance extends Component {
             displayLoading: true,
         };
 
-        let robot_IP = "192.168.1.96";
-
-        let ros = new ROSLIB.Ros({
-            url: "ws://" + robot_IP + ":9090"
+        this.ros = new ROSLIB.Ros({
+            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
         });
 
         this.currentModeListener = new ROSLIB.Topic({
-            ros : ros,
+            ros : this.ros,
             name : '/current_mode',
             messageType : 'std_msgs/String',
             throttle_rate : 1
@@ -336,11 +358,11 @@ export default class Assistance extends Component {
     }
 
     componentDidMount() {
-        this.modeCallback("TELEOPERATION");
+        //this.modeCallback("TELEOPERATION");
     }
 
     modeCallback(currentMode) {
-        if (currentMode === "TELEOPERATION") {
+        if (currentMode.data === "TELEOPERATION" || currentMode.data === "SEMI AUTONOMOUS") {
             this.setState({displayLoading: false});
             clearTimeout(this.timer);
         } else {
@@ -353,6 +375,7 @@ export default class Assistance extends Component {
     componentWillUnmount() {
         clearTimeout(this.timer);
         this.currentModeListener.unsubscribe(this.modeCallback);
+        this.ros.close();
     }
 
     handleTimeout() {

@@ -86,9 +86,9 @@ export default  class CreateWaypoints extends Component {
         this.props.history.push('/waypoints');
     }
 
-    addMarker = (e) => {
+    addMarker = (point) => {
         this.setState({
-          point: [(0.05*e.latlng.lng).toFixed(2), (0.05*e.latlng.lat).toFixed(2), (0.0).toFixed(2)]
+          point: point
         })
     }
 
@@ -98,7 +98,7 @@ export default  class CreateWaypoints extends Component {
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints onMapClick={this.addMarker} waypoints={[this.state]} showPath={false} />
+                            <MapWaypoints onMarkerCreation={this.addMarker} showLastMarkerCreated={false} waypoints={[this.state]} showPath={false} />
                         </div>
                     </div>
                 </div>
