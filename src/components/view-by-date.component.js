@@ -277,11 +277,11 @@ export default class ViewByDate extends Component {
                     <div className="card">
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
                             { this.state.waypointName ?
-                            <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                            <div className="col-12 col-sm-12" style={{paddingLeft: "0px"}}>
                                 <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}> Waypoint {this.state.waypointName}</span><br/>
                                 <span className="caption-text">Photo taken at {this.state.timestamp[this.state.currentCameraIndex]}</span>
                             </div> :
-                            <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                            <div className="col-12 col-sm-12" style={{paddingLeft: "0px"}}>
                                 <h5>{this.state.cameras[this.state.currentCameraIndex]}</h5>
                             </div>
                             }
