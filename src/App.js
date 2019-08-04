@@ -108,7 +108,6 @@ export default class App extends Component {
         this.currentModeListener.unsubscribe(this._mode_callback);
         this.batteryListener.unsubscribe(this._battery_callback);
         this.changeModePublisher.unadvertise();
-        this.ros.close();
     }
     
     requestModeChange(){

@@ -29,6 +29,7 @@ export default class CreateMission extends Component {
         this.handleDelete = this.handleDelete.bind(this);
         this.handleAddition = this.handleAddition.bind(this);
         this.handleDrag = this.handleDrag.bind(this);
+        this.selectedWaypoints = this.selectedWaypoints.bind(this);
     }
 
     componentDidMount() {
@@ -139,13 +140,17 @@ export default class CreateMission extends Component {
         }
     }
 
+    selectedWaypoints() {
+        return this.state.tags.map(tag => {return this.state.waypoints.filter(waypoint => waypoint._id === tag.id)[0]});
+    }
+
     render() {
         return (
             <div className="row">
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints onMarkerClick={this.onMarkerClick} waypoints={this.state.waypoints} showPopup={false} showPath={false} />
+                            <MapWaypoints onMarkerClick={this.onMarkerClick} polyline={this.selectedWaypoints()} waypoints={this.state.waypoints} showPopup={false} showPath={false} />
                         </div>
                     </div>
                 </div>

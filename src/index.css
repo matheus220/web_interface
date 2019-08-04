@@ -92,11 +92,9 @@ code {
   padding: 1.25rem;
 }
 
-.card-block.image-block{
+.card-block.image-block {
   min-height: 400px;
 }
-
-
 
 .card .card-header {
   background-color: transparent;

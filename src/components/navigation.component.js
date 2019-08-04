@@ -126,7 +126,6 @@ export default class Navigation extends Component {
     componentWillUnmount() {
         clearInterval(this.interval);
         this.currentModeListener.unsubscribe(this._mode_callback);
-        this.ros.close();
     }
 
     onMarkerClick(e) {

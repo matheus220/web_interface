@@ -98,7 +98,7 @@ export default  class CreateWaypoints extends Component {
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints onMarkerCreation={this.addMarker} showLastMarkerCreated={false} waypoints={[this.state]} showPath={false} />
+                            <MapWaypoints onMarkerCreation={this.addMarker} inicialPoseMarkerCreated={[0.0, 0.0, 0.0]} showLastMarkerCreated={true} waypoints={[]} showPath={false} />
                         </div>
                     </div>
                 </div>

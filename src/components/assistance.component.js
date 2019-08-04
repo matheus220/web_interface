@@ -29,24 +29,6 @@ function LoadingScreen() {
     );
 }
 
-function JoystickCmd(evt, data) {
-    
-    var direction = data.angle.degree - 90;
-    if (direction > 180) {
-        direction = -(450 - data.angle.degree);
-    }
-    // convert angles to radians and scale linear and angular speed
-    // adjust if youwant robot to drvie faster or slower
-    var lin = Math.cos(direction / 57.29) * data.distance * 0.005;
-    var ang = Math.sin(direction / 57.29) * data.distance * 0.05;
-    // nipplejs is triggering events when joystic moves each pixel
-    // we need delay between consecutive messege publications to 
-    // prevent system from being flooded by messages
-    // events triggered earlier than 50ms after last publication will be dropped 
-    console.log(lin, ang)
-}
-
-
 class AssistanceScreen extends Component {
     constructor(props) {
         super(props);
@@ -67,7 +49,9 @@ class AssistanceScreen extends Component {
             timestamp: null,
             changeControlTo: null,
             navigateTo: null,
-            currentMode: null
+            currentMode: null,
+            imageLoaded: false,
+            publishImmidiately: true
         };
 
         this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -79,6 +63,9 @@ class AssistanceScreen extends Component {
         this.addNotification = this.addNotification.bind(this);
         this.requestMovesBase = this.requestMovesBase.bind(this);
         this.notificationDOMRef = React.createRef();
+        this.onImageLoad = this.onImageLoad.bind(this);
+        this.joystickCmd = this.joystickCmd.bind(this);
+        this.moveAction = this.moveAction.bind(this);
 
         this.ros = new ROSLIB.Ros({
             url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
@@ -105,11 +92,19 @@ class AssistanceScreen extends Component {
             throttle_rate : 1
         });
 
+        this.cmdVelPublisher = new ROSLIB.Topic({
+            ros: this.ros,
+            name: '/assisted_teleop_cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+
         this.currentModeListener.subscribe(this.modeCallback);
         this.changeControlPublisher.advertise();
         this.saveDataPublisher.advertise();
+        this.cmdVelPublisher.advertise();
 
         this.timer = null;
+        this.cmdPubTimer = null;
     }
 
     modeCallback(currentMode) {
@@ -153,16 +148,14 @@ class AssistanceScreen extends Component {
             })
     }
 
-    componentDidMount() {
-        //this.fetchData()
-    }
-
     componentWillUnmount() {
         this.changeControlPublisher.unadvertise();
         this.saveDataPublisher.unadvertise();
+        this.cmdVelPublisher.unadvertise();
         this.currentModeListener.unsubscribe(this.modeCallback);
         this.ros.close();
         clearTimeout(this.timer); 
+        clearTimeout(this.cmdPubTimer);
     }
 
     onMarkerClick(e) {
@@ -260,6 +253,47 @@ class AssistanceScreen extends Component {
         });
     }
 
+    onImageLoad(event) {
+        this.setState({imageLoaded: true});
+    }
+
+    moveAction(linear, angular) {
+        let twist = new ROSLIB.Message({ 
+            linear: { x: 0, y: 0, z: 0 },
+            angular: { x: 0, y: 0, z: 0 }
+        });
+
+        if (linear !== undefined && angular !== undefined) {
+            twist.linear.x = linear;
+            twist.angular.z = angular;
+        } else {
+            twist.linear.x = 0;
+            twist.angular.z = 0;
+        }
+        this.cmdVelPublisher.publish(this.twist);
+    }
+
+    joystickCmd(evt, data) {
+        var direction = data.angle.degree - 90;
+        if (direction > 180) {
+            direction = -(450 - data.angle.degree);
+        }
+
+        // convert angles to radians and scale linear and angular speed
+        // adjust if you want robot to drvie faster or slower
+        var lin = Math.cos(direction / 57.29) * (data.distance/75) * 1.0;
+        var ang = Math.sin(direction / 57.29) * (data.distance/75) * 3.14;
+        // nipplejs is triggering events when joystic moves each pixel
+        // we need delay between consecutive messege publications to 
+        // prevent system from being flooded by messages
+        // events triggered earlier than 50ms after last publication will be dropped 
+        if (this.state.publishImmidiately) {
+            this.setState({publishImmidiately: false});
+            this.moveAction(lin, ang);
+            this.cmdPubTimer = setTimeout(this.setState({publishImmidiately: true}), 100);
+        }
+    }
+
     render() {
         let {currentMode} = this.state;
         let showTeleopButton = currentMode !== null && currentMode !== 'TELEOPERATION';
@@ -294,33 +328,38 @@ class AssistanceScreen extends Component {
                         </div>
                         }
                         <div className="card-block image-block" style={{paddingTop: "5px"}}>
-                            <ImageGallery onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
+                            <ImageGallery onImageLoad={this.onImageLoad} onSlide={this.onSlide} defaultImage={"/error.jpg"} items={this.state.images} infinite={false} lazyLoad={true} showThumbnails={false} showPlayButton={false} showBullets={true}/>
                         </div>
                     </div>
                     <div className="row">
                         <div className="col-md-12 col-xl-3 d-flex">
                             <div className="card flex-grow-1">
-                                <div className="card-block change-mode-card flex-grow-1 d-flex align-content-between flex-wrap">
+                                {this.state.imageLoaded &&
+                                <div className="card-block change-mode-card flex-grow-1 d-flex align-content-around flex-wrap">
                                     {showTeleopButton ? <button type="button" className="btn btn-primary" onClick={()=>this.setState({changeControlTo: "assisted_teleop"}, () => this.requestControlChange())} style={{width: "100%", height:"60px"}}>Teleoperation</button> : null}
                                     <ReactNotification ref={this.notificationDOMRef} />
                                     <button type="button" className="btn btn-success" onClick={this.saveData} style={{width: "100%", height:"60px"}}>Save data</button>
                                     <button type="button" className="btn btn-danger" onClick={()=>this.setState({changeControlTo: "exit"}, () => this.requestControlChange())} style={{width: "100%", height:"60px"}}>Exit</button>
-                                </div>
+                                </div>}
                             </div>
                         </div>
                         <div className="col-md-12 col-xl-9">
                             <div className="card">
                                 <div className="card-block change-mode-card d-flex justify-content-center">
-                                    <ReactNipple
-                                        options={{ mode: 'static', position: { top: '54%', left: '50%' }, color: '#0066ff', size: 150}}
-                                        style={{
-                                            width: 200,
-                                            height: 230 ,
-                                            position: 'relative'
-                                            // if you pass position: 'relative', you don't need to import the stylesheet
-                                        }}
-                                        onMove={(evt, data) => JoystickCmd(evt, data)}
-                                    />
+                                    {this.state.imageLoaded ? 
+                                        <ReactNipple
+                                            options={{ mode: 'static', position: { top: '54%', left: '50%' }, color: '#0066ff', size: 150}}
+                                            style={{
+                                                width: 200,
+                                                height: 230 ,
+                                                position: 'relative'
+                                                // if you pass position: 'relative', you don't need to import the stylesheet
+                                            }}
+                                            onMove={(evt, data) => this.joystickCmd(evt, data)}
+                                            onEnd={(evt, data) => this.moveAction(0, 0)}
+                                        /> :
+                                        null
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -358,11 +397,11 @@ export default class Assistance extends Component {
     }
 
     componentDidMount() {
-        //this.modeCallback("TELEOPERATION");
+        this.modeCallback("TELEOPERATION");
     }
 
     modeCallback(currentMode) {
-        if (currentMode.data === "TELEOPERATION" || currentMode.data === "SEMI AUTONOMOUS") {
+        if (currentMode === "TELEOPERATION" || currentMode === "SEMI AUTONOMOUS") {
             this.setState({displayLoading: false});
             clearTimeout(this.timer);
         } else {
@@ -375,7 +414,6 @@ export default class Assistance extends Component {
     componentWillUnmount() {
         clearTimeout(this.timer);
         this.currentModeListener.unsubscribe(this.modeCallback);
-        this.ros.close();
     }
 
     handleTimeout() {

@@ -74,7 +74,7 @@ export default class MapWaypoints extends Component {
             robot_pose: [9999999.9, 9999999.9, 9999999.9],
             addMarker: null,
             addMarkerOrientation: null,
-            lastMarkerCreated: null
+            lastMarkerCreated: this.props.inicialPoseMarkerCreated || [0.0, 0.0, 0.0]
         };
 
         this._onMarkerClick = this._onMarkerClick.bind(this);
@@ -104,7 +104,6 @@ export default class MapWaypoints extends Component {
         let y = (msg.pose.pose.position.y).toFixed(1);
         let orientation = rosQuaternionToGlobalTheta(msg.pose.pose.orientation).toFixed(2);
         if (x !== this.state.robot_pose[0] || y !== this.state.robot_pose[1] || orientation !== this.state.robot_pose[2]) {
-            console.log(orientation)
             this.setState({
                 robot_pose: [ x, y, orientation ]
             });
@@ -125,7 +124,6 @@ export default class MapWaypoints extends Component {
 
     componentWillUnmount() {
         this.poseListener.unsubscribe(this._pose_callback);
-        this.ros.close();
     }
 
     pointList(waypoints) {
@@ -143,7 +141,6 @@ export default class MapWaypoints extends Component {
     }
 
     onmousemove(e) {
-        this.setState({addMarkerOrientation: 3.14});
         var {addMarker} = this.state;
         if(addMarker) {
             let dy = 0.05*e.latlng.lat - addMarker[1];
@@ -154,7 +151,8 @@ export default class MapWaypoints extends Component {
     }
 
     onmouseout(e) {
-        this.setState({addMarker: null});
+        var {addMarker} = this.state;
+        if (!addMarker) this.setState({addMarker: null});
     }
 
     onclick(e) {
@@ -194,6 +192,7 @@ export default class MapWaypoints extends Component {
                         <RotatedMarker icon={robotPoseIcon} rotationAngle={this.state.addMarkerOrientation*180/(2*Math.PI)+22.5} position={[this.state.addMarker[1]/0.05, this.state.addMarker[0]/0.05]}/> 
                     : null}
                     {showPath ? <Polyline patterns={arrow} color="red" weight={2.5} opacity={0.8} lineJoin="round" dashArray="10, 10" dashOffset="0" positions={this.pointList(this.props.waypoints)} /> : null}
+                    {this.props.polyline && <Polyline patterns={arrow} color="red" weight={2.5} opacity={0.8} lineJoin="round" dashArray="10, 10" dashOffset="0" positions={this.pointList(this.props.polyline)} />}
                 </Map>
             </div>
         )
