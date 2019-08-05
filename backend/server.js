@@ -249,7 +249,7 @@ function updateFile(){
                 let toWrite = setup.concat(taskList);
 
                 exec("crontab -l > /tmp/crontab_tmp_copy.txt", function(err, stdout, stderr) {
-                    if (err) throw err;
+                    if (err) exec("touch /tmp/crontab_tmp_copy.txt");
                     fs.readFile('/tmp/crontab_tmp_copy.txt', {encoding: 'utf-8'}, function(err, data) {
                         if (err) throw error;
                     

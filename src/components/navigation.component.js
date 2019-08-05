@@ -71,13 +71,15 @@ export default class Navigation extends Component {
                     mission_waypoints.map(waypoint => {
                         let index = traveled_waypoints.findIndex(measure => measure.waypoint._id === waypoint._id);
                         waypoint.icon = 5;
+                        waypoint.showOrientation = false;
                         if (index !== -1) {
                             switch (traveled_waypoints[index].status) {
                             case 'succeeded':
                                 waypoint.icon = 1;
                                 break;
                             case 'active':
-                                waypoint.icon = 3;
+                                waypoint.icon = 8;
+                                waypoint.showOrientation = true;
                                 break;
                             case 'aborted':
                                 waypoint.icon = 2;
@@ -120,7 +122,7 @@ export default class Navigation extends Component {
 
     componentDidMount() {
         this.fetchData();
-        this.interval = setInterval(() => this.fetchData(), 5000);
+        this.interval = setInterval(this.fetchData, 8000);
     }
 
     componentWillUnmount() {

@@ -27,7 +27,6 @@ export default class Waypoints extends Component {
         axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/')
             .then(response => {
                 this.setState({ waypoints: response.data });
-                console.log(response.data)
             })
             .catch(function (error){
                 console.log(error);
@@ -71,7 +70,7 @@ export default class Waypoints extends Component {
     }
 
     onMarkerClick(e) {
-        this.setState({selectedWaypoint: e.target.options.id});
+        this.setState({selectedWaypoint: e.target.options.id, search: e.target.options.name});
     }
 
     render() {

@@ -113,7 +113,6 @@ export default  class WaypointsEdit extends Component {
     }
 
     render() {
-        console.log(this.state.inicialPoseMarkerCreated)
         return (
             <div className="row">
                 <div className="col-md-12 col-xl-9">

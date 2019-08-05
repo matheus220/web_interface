@@ -51,7 +51,10 @@ class AssistanceScreen extends Component {
             navigateTo: null,
             currentMode: null,
             imageLoaded: false,
-            publishImmidiately: true
+            publishImmidiately: true,
+            linear: 0,
+            angular: 0,
+            stopPub: false
         };
 
         this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -116,7 +119,6 @@ class AssistanceScreen extends Component {
             .then(response => {
                 if (response.data !== null) {
                     if (response.data.status === 'active') {
-                        console.log("entrou no fetchData", response.data.data)
                         var mapWaypoints = [];
                         let traveledWaypoints = response.data.data;
                         mapWaypoints = traveledWaypoints.map(data => {
@@ -154,7 +156,7 @@ class AssistanceScreen extends Component {
         this.cmdVelPublisher.unadvertise();
         this.currentModeListener.unsubscribe(this.modeCallback);
         clearTimeout(this.timer); 
-        clearTimeout(this.cmdPubTimer);
+        clearInterval(this.cmdPubTimer);
     }
 
     onMarkerClick(e) {
@@ -211,7 +213,6 @@ class AssistanceScreen extends Component {
         if(stringMessage.data !== "") {
             this.changeControlPublisher.publish(stringMessage)
             this.setState({changeControlTo:null , navigateTo: null});
-            console.log(stringMessage.data)
         }
     }
 
@@ -256,7 +257,14 @@ class AssistanceScreen extends Component {
         this.setState({imageLoaded: true});
     }
 
-    moveAction(linear, angular) {
+    moveAction() {
+        let {linear, angular} = this.state;
+        if(this.state.stopPub){
+            linear = 0.0;
+            angular = 0.0;
+            clearInterval(this.cmdPubTimer)
+            this.setState({stopPub: false})
+        }
         let twist = new ROSLIB.Message({ 
             linear: { x: 0, y: 0, z: 0 },
             angular: { x: 0, y: 0, z: 0 }
@@ -269,7 +277,11 @@ class AssistanceScreen extends Component {
             twist.linear.x = 0;
             twist.angular.z = 0;
         }
-        this.cmdVelPublisher.publish(this.twist);
+        this.cmdVelPublisher.publish(twist);
+    }
+
+    loopMoveAction() {
+        this.cmdPubTimer = setInterval(this.moveAction, 100);
     }
 
     joystickCmd(evt, data) {
@@ -280,17 +292,13 @@ class AssistanceScreen extends Component {
 
         // convert angles to radians and scale linear and angular speed
         // adjust if you want robot to drvie faster or slower
-        var lin = Math.cos(direction / 57.29) * (data.distance/75) * 1.0;
-        var ang = Math.sin(direction / 57.29) * (data.distance/75) * 3.14;
+        var lin = Math.cos(direction / 57.29) * (data.distance/75) * 0.4;
+        var ang = Math.sin(direction / 57.29) * (data.distance/75) * 0.7;
         // nipplejs is triggering events when joystic moves each pixel
         // we need delay between consecutive messege publications to 
         // prevent system from being flooded by messages
         // events triggered earlier than 50ms after last publication will be dropped 
-        if (this.state.publishImmidiately) {
-            this.setState({publishImmidiately: false});
-            this.moveAction(lin, ang);
-            this.cmdPubTimer = setTimeout(this.setState({publishImmidiately: true}), 100);
-        }
+        this.setState({linear: lin, angular: ang});
     }
 
     render() {
@@ -309,19 +317,19 @@ class AssistanceScreen extends Component {
                     <div className="card">
                         { this.state.waypointName ?
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
-                            <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
-                                <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}>Waypoint {this.state.waypointName}</span><br/>
+                            <div className="col-12 col-sm-9" style={{paddingLeft: "0px"}}>
+                                <h5>{this.state.cameras[this.state.currentCameraIndex]}  | </h5><span style={{color: '#7e7e7e', fontSize:"0.9em"}}> Waypoint {this.state.waypointName}</span><br/>
                                 <span className="caption-text">Photo taken at {this.state.timestamp[this.state.currentCameraIndex]}</span>
                             </div>
-                            <div className="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
+                            <div className="col-12 col-sm-3 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <button type="button" onClick={this.toggleRealTime} className="btn btn-sm btn-secondary">REAL-TIME</button>
                             </div>
                         </div> :
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
-                            <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
+                            <div className="col-12 col-sm-9" style={{paddingLeft: "0px"}}>
                                 <h5>{this.state.cameras[this.state.currentCameraIndex]}</h5>
                             </div>
-                            <div className="col-12 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
+                            <div className="col-12 col-sm-3 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <button type="button" className="btn btn-sm btn-success">REAL-TIME</button>
                             </div>
                         </div>
@@ -355,7 +363,8 @@ class AssistanceScreen extends Component {
                                                 // if you pass position: 'relative', you don't need to import the stylesheet
                                             }}
                                             onMove={(evt, data) => this.joystickCmd(evt, data)}
-                                            onEnd={(evt, data) => this.moveAction(0, 0)}
+                                            onStart={(evt, data) => this.loopMoveAction()}
+                                            onEnd={(evt, data) => this.setState({stopPub: true})}
                                         /> :
                                         null
                                     }
