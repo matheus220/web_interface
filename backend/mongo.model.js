@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 
 let Waypoint = new Schema({
     name: {
-        type: String
+        type: String,
+        unique: true
     },
     point: {
         type: [Number]
@@ -11,7 +12,7 @@ let Waypoint = new Schema({
     map: {
         type: String
     },
-    rack: {
+    group: {
         type: String
     }
 }, { collection: 'waypoint' });

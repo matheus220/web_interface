@@ -46,8 +46,8 @@ waypointRoutes.route('/').get(function(req, res) {
 
 waypointRoutes.route('/:id').get(function(req, res) {
     let id = req.params.id;
-    Waypoint.findById(id, function(err, todo) {
-        res.json(todo);
+    Waypoint.findById(id, function(err, wp) {
+        res.json(wp);
     });
 });
 
@@ -61,17 +61,17 @@ waypointRoutes.route('/delete/:id').post(function(req, res) {
 });
 
 waypointRoutes.route('/update/:id').post(function(req, res) {
-    Waypoint.findById(req.params.id, function(err, todo) {
-        if (!todo)
-            res.status(404).send("data is not found");
+    Waypoint.findById(req.params.id, function(err, waypoint) {
+        if (!waypoint)
+            res.status(404).send("Waypoint is not found");
         else
-            todo.todo_description = req.body.todo_description;
-            todo.todo_responsible = req.body.todo_responsible;
-            todo.todo_priority = req.body.todo_priority;
-            todo.todo_completed = req.body.todo_completed;
+            waypoint.name = req.body.name;
+            waypoint.point = req.body.point;
+            waypoint.map = req.body.map;
+            waypoint.group = req.body.group;
 
-            todo.save().then(todo => {
-                res.json('Todo updated!');
+            waypoint.save().then(wp => {
+                res.json('Waypoint updated!');
             })
             .catch(err => {
                 res.status(400).send("Update not possible");
@@ -110,17 +110,15 @@ missionRoutes.route('/:id').get(function(req, res) {
 });
 
 missionRoutes.route('/update/:id').post(function(req, res) {
-    Mission.findById(req.params.id, function(err, todo) {
-        if (!todo)
-            res.status(404).send("data is not found");
+    Mission.findById(req.params.id, function(err, mission) {
+        if (!mission)
+            res.status(404).send("mission is not found");
         else
-            todo.todo_description = req.body.todo_description;
-            todo.todo_responsible = req.body.todo_responsible;
-            todo.todo_priority = req.body.todo_priority;
-            todo.todo_completed = req.body.todo_completed;
+            mission.name = req.body.name;
+            mission.path = req.body.path;
 
-            todo.save().then(todo => {
-                res.json('Todo updated!');
+            mission.save().then(m => {
+                res.json('Mission updated!');
             })
             .catch(err => {
                 res.status(400).send("Update not possible");

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ROSLIB from 'roslib';
-import { Map, ImageOverlay, Marker, Popup, Polyline } from "react-leaflet";
+import { Map, ImageOverlay, Popup, Polyline } from "react-leaflet";
 import L from 'leaflet';
 import PolylineDecorator from "./polyline-decorator.component";
 import RotatedMarker from "./rotated-marker.component";
@@ -42,14 +42,21 @@ var robotPoseIcon = new LeafIcon({
     iconUrl: require('./../navigation.png'),
     iconSize:     [34, 34],
     iconAnchor:   [17, 17],
-    popupAnchor:  [-5, -46]
+    popupAnchor:  [0, -20]
 });
 
 var robotPoseIcon1 = new LeafIcon({
     iconUrl: require('./../navigation1.png'),
     iconSize:     [34, 34],
     iconAnchor:   [17, 17],
-    popupAnchor:  [-5, -46]
+    popupAnchor:  [0, -20]
+});
+
+var robotPoseIcon2 = new LeafIcon({
+    iconUrl: require('./../navigation2.png'),
+    iconSize:     [34, 34],
+    iconAnchor:   [17, 17],
+    popupAnchor:  [0, -20]
 });
 
 var icons = [
@@ -59,8 +66,9 @@ var icons = [
     new LeafIcon({iconUrl: require('./../orange.png')}),
     new LeafIcon({iconUrl: require('./../purple.png')}),
     new LeafIcon({iconUrl: require('./../grey.png')}),
-    new LeafIcon({iconUrl: require('./../navigation.png')}),
-    new LeafIcon({iconUrl: require('./../navigation1.png')})
+    robotPoseIcon,
+    robotPoseIcon1,
+    robotPoseIcon2
 ]
 
 const bounds = [[-396.06, -1771.58], [2103.94, 728.42]]
@@ -74,7 +82,7 @@ export default class MapWaypoints extends Component {
             robot_pose: [9999999.9, 9999999.9, 9999999.9],
             addMarker: null,
             addMarkerOrientation: null,
-            lastMarkerCreated: this.props.inicialPoseMarkerCreated || [0.0, 0.0, 0.0]
+            lastMarkerCreated: this.props.inicialPoseMarkerCreated
         };
 
         this._onMarkerClick = this._onMarkerClick.bind(this);
@@ -119,6 +127,12 @@ export default class MapWaypoints extends Component {
     _onMarkerClick(e) {
         if(typeof this.props.onMarkerClick === "function") {
             this.props.onMarkerClick(e);
+        }
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (JSON.stringify(nextProps.inicialPoseMarkerCreated) !== JSON.stringify(this.props.inicialPoseMarkerCreated)) {
+          this.setState({ lastMarkerCreated: nextProps.inicialPoseMarkerCreated })
         }
     }
 
@@ -176,11 +190,19 @@ export default class MapWaypoints extends Component {
                         url={map}
                     />
                     {this.props.waypoints.map((waypoint) => 
-                        <Marker onClick={this._onMarkerClick} icon={icons[waypoint.icon ? waypoint.icon : 0]} key={waypoint._id} id={waypoint._id} name={waypoint.name} position={[waypoint.point[1]/0.05, waypoint.point[0]/0.05]}>
+                        <RotatedMarker 
+                            onClick={this._onMarkerClick} 
+                            rotationAngle={waypoint.showOrientation ? -waypoint.point[2]*180/(2*Math.PI)+22.5 : 0}
+                            icon={icons[waypoint.icon ? waypoint.icon : 0]}
+                            key={waypoint._id} 
+                            id={waypoint._id} 
+                            name={waypoint.name} 
+                            position={[waypoint.point[1]/0.05, waypoint.point[0]/0.05]}>
+
                             {this.props.showPopup ? <Popup>
                                 <span>{waypoint.name ? waypoint.name : 'unknown'}</span>
                             </Popup> : null}
-                        </Marker>
+                        </RotatedMarker>
                     )}
                     {show_robot_pose ? 
                         <RotatedMarker icon={robotPoseIcon} rotationAngle={-this.state.robot_pose[2]*180/(2*Math.PI)+22.5} position={[this.state.robot_pose[1]/0.05, this.state.robot_pose[0]/0.05]}/> 

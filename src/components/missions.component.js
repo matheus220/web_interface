@@ -1,8 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
 import MapWaypoints from "./map.component";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus, faTimes, faPen } from '@fortawesome/free-solid-svg-icons'
 import './style-list-waypoints.css';
 
 export default class Missions extends Component {
@@ -74,20 +76,20 @@ export default class Missions extends Component {
                 selected_mission: e
             });
         }
-        
     }
 
     render() {
 
         let filtered = this.state.missions.filter(
             (mission) => {
-                return mission.name.indexOf(this.state.search) !== -1;
+                let name = mission.name.toLowerCase();
+                return name.indexOf(this.state.search.toLowerCase()) !== -1;
             }
         );
 
-        // let filtered_sorted = filtered.sort((m1, m2) => (m1.name > m2.name) ? 1 : -1);
+        let filtered_sorted = filtered.sort((m1, m2) => (m1.name.toLowerCase() > m2.name.toLowerCase()) ? 1 : -1);
 
-        let missions = filtered.map(mission =>
+        let missions = filtered_sorted.map(mission =>
             <List key={mission._id} item={mission} selected={this.state.selected_mission._id === mission._id ? true : false} onItemClick={this.deleteItem} onItemClick2={this.select} />
         );
 
@@ -109,7 +111,7 @@ export default class Missions extends Component {
                             <div className="col-6 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <Link to="/create_mission">
                                     <button type="button" className="btn btn-success">
-                                        +
+                                        <FontAwesomeIcon icon={faPlus} />
                                     </button>
                                 </Link>
                             </div>
@@ -138,6 +140,11 @@ class List extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            isMouseInside: false
+        }
+        this.mouseEnter = this.mouseEnter.bind(this);
+        this.mouseLeave = this.mouseLeave.bind(this);
         this._onClick = this._onClick.bind(this);
         this._onClick2 = this._onClick2.bind(this);
     }
@@ -154,12 +161,29 @@ class List extends Component {
         }
     }
 
+    mouseEnter = () => {
+        this.setState({ isMouseInside: true });
+    }
+
+    mouseLeave = () => {
+        this.setState({ isMouseInside: false });
+    }
+
     render() {
-        let classes = "col text li-missions" + (this.props.selected ? " selected" : "");
+        let classes = "col text li-missions flex-grow-1" + (this.props.selected ? " selected" : "");
         return (
-            <li key={this.props.item._id} className="li-list">
-                <div className={classes}  onClick={this._onClick2}>{this.props.item.name}</div>
-                <button type="button" onClick={this._onClick} className="btn btn-danger" style={{margin: "0px 1px 0px 0px", fontSize: "1.1em"}}>-</button>
+            <li key={this.props.item._id} className="li-list" onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave}>
+                <div className="d-flex align-items-center justify-content-between" style={{width: "100%"}}>
+                    <div className={classes}  onClick={this._onClick2}>{this.props.item.name}</div>
+                    {(this.props.selected || this.state.isMouseInside) ? 
+                    <div>
+                        <Link to={"/mission-edit/"+this.props.item._id}>
+                            <button type="button" className="btn btn-info" style={{margin: "auto 1px", fontSize: "1.05em"}}><FontAwesomeIcon icon={faPen} /></button>
+                        </Link>
+                        <button type="button" onClick={this._onClick} className="btn btn-danger" style={{margin: "auto 1px", fontSize: "1.05em"}}><FontAwesomeIcon icon={faTimes}/></button>
+                    </div>
+                    : null}
+                </div>
             </li>
         );
     }

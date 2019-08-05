@@ -7,7 +7,6 @@ import DropdownList from 'react-widgets/lib/DropdownList';
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import EditTodo from "./components/edit-todo.component";
 import Waypoints from "./components/waypoints.component";
 import Missions from "./components/missions.component";
 import Navigation from "./components/navigation.component";
@@ -16,6 +15,8 @@ import CreateMission from "./components/create-mission.component";
 import Schedule from "./components/schedule.component";
 import Assistance from "./components/assistance.component";
 import ViewByDate from "./components/view-by-date.component";
+import MissionEdit from "./components/mission-edit.component";
+import WaypointEdit from "./components/waypoint-edit.component";
 
 import logo from "./logo.png";
 
@@ -237,11 +238,12 @@ export default class App extends Component {
                                     {this.renderRedirect()}
                                     <Switch>
                                         <Route path="/" exact component={Navigation} />
-                                        <Route path="/edit/:id" component={EditTodo} />
                                         <Route path="/waypoints" component={Waypoints} />
                                         <Route path="/create_waypoint" component={CreateWaypoint} />
+                                        <Route path="/waypoint-edit/:id" component={WaypointEdit} />
                                         <Route path="/missions" component={Missions} />
                                         <Route path="/create_mission" component={CreateMission} />
+                                        <Route path="/mission-edit/:id" component={MissionEdit} />
                                         <Route path="/schedule" component={Schedule} />
                                         <Route path="/assistance" component={Assistance} />
                                         <Route path="/database" component={ViewByDate} />

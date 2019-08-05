@@ -11,7 +11,7 @@ const KeyCodes = {
   
 const delimiters = [KeyCodes.comma, KeyCodes.enter];
 
-export default class CreateMission extends Component {
+export default class MissionEdit extends Component {
 
     constructor(props) {
         super(props);
@@ -32,7 +32,7 @@ export default class CreateMission extends Component {
         this.selectedWaypoints = this.selectedWaypoints.bind(this);
     }
 
-    componentDidMount() {
+    componentWillMount() {
         axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/')
             .then(response => {
                 let suggestions = response.data.map(
@@ -40,10 +40,30 @@ export default class CreateMission extends Component {
                         return {id: waypoint._id, text: waypoint.name}
                     }
                 )
+
                 this.setState({
                     waypoints: response.data,
                     suggestions: suggestions
                 });
+
+                axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/'+this.props.match.params.id)
+                    .then(response => {
+                        this.setState({
+                            name: response.data.name
+                        })
+                        const { waypoints } = this.state;
+                        response.data.path.map(waypoint => {
+                            let index = waypoints.findIndex((wp => wp._id === waypoint));
+                            if (index !== -1) {
+                                let tag = {id: waypoint, text: waypoints[index].name};
+                                this.handleAddition(tag);
+                            }
+                            return waypoint
+                        });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
             })
             .catch(function (error){
                 console.log(error);
@@ -104,8 +124,8 @@ export default class CreateMission extends Component {
                 name: this.state.name,
                 path: path
             };
-    
-            axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/add', newMission)
+
+            axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/update/'+this.props.match.params.id, newMission)
                 .then(res => {
                     this.setState({
                         name: '',
@@ -161,7 +181,7 @@ export default class CreateMission extends Component {
                     <div className="card">
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
                             <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
-                                <h5>Create Mission</h5>
+                                <h5>Update Mission</h5>
                             </div>
                         </div>
                         <div className="card-block">
@@ -191,7 +211,7 @@ export default class CreateMission extends Component {
                                 
                                 <div className="buttons-group form-group d-flex justify-content-around">
                                     <input onClick={this.onCancel} type="button" value="Cancel" className="btn btn-danger" />
-                                    <input type="submit" value="Create" className="btn btn-primary" />
+                                    <input type="submit" value="Update" className="btn btn-primary" />
                                 </div>
                             </form>
                         </div>

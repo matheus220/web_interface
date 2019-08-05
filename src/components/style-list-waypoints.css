@@ -33,17 +33,22 @@
 
 .listItems .li-list {
     display: flex;
-    border-radius: 3px;
+    border-radius: 5px;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 7px;
     background-color: #dee2eb;
+    transition: 0.3s;
 }
 
 .listItems .li-list:hover {
     background-color: #cdcdcd;
+    border-radius: 5px;
 }
 
 .listItems .text {
-    padding: 0.5em 0.7em;
+    padding: 0.65em 0.7em;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow:ellipsis;
 }

@@ -3,16 +3,20 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
 import MapWaypoints from "./map.component";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus, faTimes, faPen } from '@fortawesome/free-solid-svg-icons'
 import './style-list-waypoints.css';
 
 export default class Waypoints extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {waypoints: [], search: ''};
+        this.state = {waypoints: [], search: '', selectedWaypoint: ''};
 
         this.updateSearch = this.updateSearch.bind(this);
         this.deleteItem = this.deleteItem.bind(this);
+        this.select = this.select.bind(this);
+        this.onMarkerClick = this.onMarkerClick.bind(this);
     }
 
     updateSearch(e) {
@@ -23,6 +27,7 @@ export default class Waypoints extends Component {
         axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/')
             .then(response => {
                 this.setState({ waypoints: response.data });
+                console.log(response.data)
             })
             .catch(function (error){
                 console.log(error);
@@ -53,16 +58,40 @@ export default class Waypoints extends Component {
             })        
     }
 
+    select(e) {
+        if(this.state.selectedWaypoint === e._id) {
+            this.setState({
+                selectedWaypoint: ''
+            });
+        } else {
+            this.setState({
+                selectedWaypoint: e._id
+            });
+        }
+    }
+
+    onMarkerClick(e) {
+        this.setState({selectedWaypoint: e.target.options.id});
+    }
+
     render() {
 
         let filtered = this.state.waypoints.filter(
             (wp) => {
-                return wp.name.indexOf(this.state.search) !== -1;
+                let name = wp.name.toLowerCase();
+                if (wp._id === this.state.selectedWaypoint) {
+                    wp.icon = 8;
+                    wp.showOrientation = true;
+                } else {
+                    wp.icon = 0;
+                    wp.showOrientation = false;
+                }
+                return name.indexOf(this.state.search.toLowerCase()) !== -1;
             }
         );
-        let filtered_sorted = filtered.sort((wp1, wp2) => (wp1.name > wp2.name) ? 1 : -1);
+        let filtered_sorted = filtered.sort((wp1, wp2) => (wp1.name.toLowerCase() > wp2.name.toLowerCase()) ? 1 : -1);
         let waypoint = filtered_sorted.map(wp =>
-            <List key={wp._id} item={wp} onItemClick={this.deleteItem} />
+            <List key={wp._id} item={wp} selected={this.state.selectedWaypoint === wp._id ? true : false} onItemClick={this.deleteItem} onItemClick2={this.select} />
         );
 
         return (
@@ -70,7 +99,7 @@ export default class Waypoints extends Component {
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints waypoints={filtered} showPopup={true} showPath={false} />
+                            <MapWaypoints waypoints={filtered} onMarkerClick={this.onMarkerClick} showPopup={false} showPath={false} />
                         </div>
                     </div>
                 </div>
@@ -83,7 +112,7 @@ export default class Waypoints extends Component {
                             <div className="col-6 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <Link to="/create_waypoint">
                                     <button type="button" className="btn btn-success">
-                                        +
+                                        <FontAwesomeIcon icon={faPlus} />
                                     </button>
                                 </Link>
                             </div>
@@ -112,18 +141,50 @@ class List extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            isMouseInside: false
+        }
+        this.mouseEnter = this.mouseEnter.bind(this);
+        this.mouseLeave = this.mouseLeave.bind(this);
         this._onClick = this._onClick.bind(this);
+        this._onClick2 = this._onClick2.bind(this);
     }
 
     _onClick() {
-        this.props.onItemClick(this.props.item._id);
+        if(typeof this.props.onItemClick === "function") {
+            this.props.onItemClick(this.props.item._id);
+        }
+    }
+
+    _onClick2() {
+        if(typeof this.props.onItemClick2 === "function") {
+            this.props.onItemClick2(this.props.item);
+        }
+    }
+
+    mouseEnter = () => {
+        this.setState({ isMouseInside: true });
+    }
+
+    mouseLeave = () => {
+        this.setState({ isMouseInside: false });
     }
 
     render() {
+        let classes = "col text li-missions flex-grow-1" + (this.props.selected ? " selected" : "");
         return (
-            <li key={this.props.item._id} className="li-list">
-                <div className="text">{this.props.item.name}</div>
-                <button type="button" onClick={this._onClick} className="btn btn-danger" style={{margin: "0px", fontSize: "1.1em"}}>-</button>
+            <li key={this.props.item._id} className="li-list" onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave}>
+                <div className="d-flex align-items-center justify-content-between" style={{width: "100%"}}>
+                    <div className={classes}  onClick={this._onClick2}>{this.props.item.name}</div>
+                    {(this.props.selected || this.state.isMouseInside) ? 
+                    <div>
+                        <Link to={"/waypoint-edit/"+this.props.item._id}>
+                            <button type="button" className="btn btn-info" style={{margin: "auto 1px", fontSize: "1.05em"}}><FontAwesomeIcon icon={faPen} /></button>
+                        </Link>
+                        <button type="button" onClick={this._onClick} className="btn btn-danger" style={{margin: "auto 1px", fontSize: "1.05em"}}><FontAwesomeIcon icon={faTimes}/></button>
+                    </div>
+                    : null}
+                </div>
             </li>
         );
     }

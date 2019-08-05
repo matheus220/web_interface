@@ -5,6 +5,8 @@ import DropdownList from 'react-widgets/lib/DropdownList'
 import axios from 'axios';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Cron from "./cron-generator.component";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons'
 import 'react-widgets/dist/css/react-widgets.css';
 
 function formatDate(date) {
@@ -41,7 +43,7 @@ class Task extends Component {
                 <td>{formatDate(this.props.task.next)}</td>
                 <td style={{textAlign: "center"}}><input type="checkbox" defaultChecked={this.props.task.active} onChange={this._handleChangeChk}/></td>
                 <td style={{textAlign: "center"}}>
-                    <button type="button" id={this.props.task._id} onClick={this._onClick} className="btn btn-danger button-style" style={{width: "40px", verticalAlign: "middle", margin: "0px 0px 0px 0px", fontSize: "1.1em"}}>-</button>
+                    <button type="button" id={this.props.task._id} onClick={this._onClick} className="btn btn-danger button-style" style={{width: "40px", verticalAlign: "middle", margin: "0px 0px 0px 0px", fontSize: "1.1em"}}><FontAwesomeIcon icon={faTimes} /></button>
                 </td>
             </tr>
         );
@@ -165,7 +167,7 @@ export default class Schedule extends Component {
                             </div>
                             <div className="col-6 col-sm-6 d-flex justify-content-end" style={{paddingRight: "0px"}}>
                                 <button onClick={this.toggleModal} type="button" className="btn btn-success">
-                                    +
+                                    <FontAwesomeIcon icon={faPlus} />
                                 </button>
                             </div>
                         </div>

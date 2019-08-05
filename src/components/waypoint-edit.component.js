@@ -5,7 +5,7 @@ import MapWaypoints from "./map.component";
 
 const mapName = "WD_WA_WB"
 
-export default  class CreateWaypoints extends Component {
+export default  class WaypointsEdit extends Component {
 
     constructor(props) {
         super(props);
@@ -22,8 +22,25 @@ export default  class CreateWaypoints extends Component {
             point: [0.0, 0.0, 0.0],
             map: mapName,
             group: '',
-            icon: 0
+            icon: 0,
+            inicialPoseMarkerCreated: null
         }
+    }
+
+    componentDidMount() {
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/'+this.props.match.params.id)
+            .then(response => {
+                this.setState({
+                    name: response.data.name,
+                    point: response.data.point,
+                    map: response.data.map,
+                    group: response.data.group,
+                    inicialPoseMarkerCreated: response.data.point
+                })
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
     }
 
     onChangeWaypointName(e) {
@@ -60,7 +77,7 @@ export default  class CreateWaypoints extends Component {
             group: this.state.group
         };
 
-        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/add', newWaypoint)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/update/'+this.props.match.params.id, newWaypoint)
             .then(res => {
                 this.setState({
                     name: '',
@@ -68,7 +85,7 @@ export default  class CreateWaypoints extends Component {
                     map: mapName,
                     group: ''
                 })
-                
+
                 this.props.history.push('/waypoints');
             })
             .catch(function (error){
@@ -96,12 +113,13 @@ export default  class CreateWaypoints extends Component {
     }
 
     render() {
+        console.log(this.state.inicialPoseMarkerCreated)
         return (
             <div className="row">
                 <div className="col-md-12 col-xl-9">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints onMarkerCreation={this.addMarker} inicialPoseMarkerCreated={[0.0, 0.0, 0.0]} showLastMarkerCreated={true} waypoints={[]} showPath={false} />
+                            <MapWaypoints onMarkerCreation={this.addMarker} inicialPoseMarkerCreated={this.state.inicialPoseMarkerCreated} showLastMarkerCreated={true} waypoints={[]} showPath={false} />
                         </div>
                     </div>
                 </div>

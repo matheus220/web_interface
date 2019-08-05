@@ -153,7 +153,6 @@ class AssistanceScreen extends Component {
         this.saveDataPublisher.unadvertise();
         this.cmdVelPublisher.unadvertise();
         this.currentModeListener.unsubscribe(this.modeCallback);
-        this.ros.close();
         clearTimeout(this.timer); 
         clearTimeout(this.cmdPubTimer);
     }
@@ -302,7 +301,7 @@ class AssistanceScreen extends Component {
                 <div className="col-md-12 col-xl-6">
                     <div className="card">
                         <div className="card-block">
-                            <MapWaypoints waypoints={this.state.mapWaypoints} robotPose={true} onMarkerCreation={this.requestMovesBase} showLastMarkerCreated={true} onMarkerClick={this.onMarkerClick} showPath={false} height={"83vh"}/>
+                            <MapWaypoints waypoints={this.state.mapWaypoints} robotPose={true} onMarkerCreation={this.requestMovesBase} inicialPoseMarkerCreated={null} showLastMarkerCreated={true} onMarkerClick={this.onMarkerClick} showPath={false} height={"83vh"}/>
                         </div>
                     </div>
                 </div>
@@ -397,11 +396,11 @@ export default class Assistance extends Component {
     }
 
     componentDidMount() {
-        this.modeCallback("TELEOPERATION");
+        //this.modeCallback("TELEOPERATION");
     }
 
     modeCallback(currentMode) {
-        if (currentMode === "TELEOPERATION" || currentMode === "SEMI AUTONOMOUS") {
+        if (currentMode.data === "TELEOPERATION" || currentMode.data === "SEMI AUTONOMOUS") {
             this.setState({displayLoading: false});
             clearTimeout(this.timer);
         } else {
