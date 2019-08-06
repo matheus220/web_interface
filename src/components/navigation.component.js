@@ -14,12 +14,17 @@ function FormatDate(date) {
 export default class Navigation extends Component {
     constructor(props) {
         super(props);
+        // this.defaultImages = [
+        //     { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=7' },
+        //     { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=7' },
+        //     { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=7' }
+        // ]
+        // this.defaultCameras = ['bass_camera', 'middle_camera', 'top_camera']
         this.defaultImages = [
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=7' },
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=7' },
-            { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=7' }
+            { original: 'http://192.168.1.39:8080/stream?topic=/nav_cam/image_raw&type=mjpeg&quality=7' }
         ]
-        this.defaultCameras = ['bass_camera', 'middle_camera', 'top_camera']
+        this.defaultCameras = ['nav_camera']
+        
 
         this.state = {
             logmission: {},
