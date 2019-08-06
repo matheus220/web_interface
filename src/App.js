@@ -18,6 +18,8 @@ import ViewByDate from "./components/view-by-date.component";
 import MissionEdit from "./components/mission-edit.component";
 import WaypointEdit from "./components/waypoint-edit.component";
 
+import { ROSProvider } from './components/ROSContext'
+
 import logo from "./logo.png";
 
 const NoMatch = ({ location }) => (
@@ -236,19 +238,21 @@ export default class App extends Component {
                             <div className="page-wrapper">
                                 <div className="page-body">
                                     {this.renderRedirect()}
-                                    <Switch>
-                                        <Route path="/" exact component={Navigation} />
-                                        <Route path="/waypoints" component={Waypoints} />
-                                        <Route path="/create_waypoint" component={CreateWaypoint} />
-                                        <Route path="/waypoint-edit/:id" component={WaypointEdit} />
-                                        <Route path="/missions" component={Missions} />
-                                        <Route path="/create_mission" component={CreateMission} />
-                                        <Route path="/mission-edit/:id" component={MissionEdit} />
-                                        <Route path="/schedule" component={Schedule} />
-                                        <Route path="/assistance" component={Assistance} />
-                                        <Route path="/database" component={ViewByDate} />
-                                        <Route component={NoMatch} />
-                                    </Switch>
+                                    <ROSProvider value={this.ros}>
+                                        <Switch>
+                                            <Route path="/" exact component={Navigation} />
+                                            <Route path="/waypoints" component={Waypoints} />
+                                            <Route path="/create_waypoint" component={CreateWaypoint} />
+                                            <Route path="/waypoint-edit/:id" component={WaypointEdit} />
+                                            <Route path="/missions" component={Missions} />
+                                            <Route path="/create_mission" component={CreateMission} />
+                                            <Route path="/mission-edit/:id" component={MissionEdit} />
+                                            <Route path="/schedule" component={Schedule} />
+                                            <Route path="/assistance" component={Assistance} />
+                                            <Route path="/database" component={ViewByDate} />
+                                            <Route component={NoMatch} />
+                                        </Switch>
+                                    </ROSProvider>
                                 </div>
                             </div>
                         </div>

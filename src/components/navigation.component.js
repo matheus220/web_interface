@@ -6,12 +6,14 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
 import "react-image-gallery/styles/css/image-gallery.css";
 import 'react-widgets/dist/css/react-widgets.css';
+import ROSContext from './ROSContext'
 
 function FormatDate(date) {
     return(date.slice(5,-7))
 }
 
 export default class Navigation extends Component {
+    static contextType = ROSContext
     constructor(props) {
         super(props);
         // this.defaultImages = [
@@ -24,7 +26,6 @@ export default class Navigation extends Component {
             { original: 'http://192.168.1.39:8080/stream?topic=/nav_cam/image_raw&type=mjpeg&quality=7' }
         ]
         this.defaultCameras = ['nav_camera']
-        
 
         this.state = {
             logmission: {},
@@ -44,19 +45,6 @@ export default class Navigation extends Component {
         this.onSlide = this.onSlide.bind(this);
         this._mode_callback = this._mode_callback.bind(this);
         this.fetchData = this.fetchData.bind(this);
-        
-        this.ros = new ROSLIB.Ros({
-            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
-        });
-
-        this.currentModeListener = new ROSLIB.Topic({
-            ros : this.ros,
-            name : '/current_mode',
-            messageType : 'std_msgs/String',
-            throttle_rate : 1
-        });
-
-        this.currentModeListener.subscribe(this._mode_callback);
 
         this.interval = null;
     }
@@ -126,6 +114,15 @@ export default class Navigation extends Component {
     }
 
     componentDidMount() {
+        this.currentModeListener = new ROSLIB.Topic({
+            ros : this.context,
+            name : '/current_mode',
+            messageType : 'std_msgs/String',
+            throttle_rate : 1
+        });
+
+        this.currentModeListener.subscribe(this._mode_callback);
+
         this.fetchData();
         this.interval = setInterval(this.fetchData, 8000);
     }

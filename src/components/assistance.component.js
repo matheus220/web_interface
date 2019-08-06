@@ -7,6 +7,7 @@ import ImageGallery from 'react-image-gallery';
 import ReactNipple from 'react-nipple';
 import ReactNotification from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
+import ROSContext from './ROSContext'
 
 function FormatDate(date) {
     return(date.slice(5,-7))
@@ -30,6 +31,7 @@ function LoadingScreen() {
 }
 
 class AssistanceScreen extends Component {
+    static contextType = ROSContext
     constructor(props) {
         super(props);
 
@@ -74,42 +76,6 @@ class AssistanceScreen extends Component {
         this.joystickCmd = this.joystickCmd.bind(this);
         this.moveAction = this.moveAction.bind(this);
 
-        this.ros = new ROSLIB.Ros({
-            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
-        });
-
-        this.changeControlPublisher = new ROSLIB.Topic({
-            ros : this.ros,
-            name : '/change_control',
-            messageType : 'std_msgs/String',
-            throttle_rate : 10
-        });
-
-        this.saveDataPublisher = new ROSLIB.Topic({
-            ros : this.ros,
-            name : '/order_to_save',
-            messageType : 'std_msgs/Empty',
-            throttle_rate : 10
-        });
-
-        this.currentModeListener = new ROSLIB.Topic({
-            ros : this.ros,
-            name : '/current_mode',
-            messageType : 'std_msgs/String',
-            throttle_rate : 1
-        });
-
-        this.cmdVelPublisher = new ROSLIB.Topic({
-            ros: this.ros,
-            name: '/assisted_teleop_cmd_vel',
-            messageType: 'geometry_msgs/Twist'
-        });
-
-        this.currentModeListener.subscribe(this.modeCallback);
-        this.changeControlPublisher.advertise();
-        this.saveDataPublisher.advertise();
-        this.cmdVelPublisher.advertise();
-
         this.timer = null;
         this.cmdPubTimer = null;
     }
@@ -152,6 +118,40 @@ class AssistanceScreen extends Component {
             .catch(function (error){
                 console.log(error);
             })
+    }
+
+    componentDidMount() {
+        this.changeControlPublisher = new ROSLIB.Topic({
+            ros : this.context,
+            name : '/change_control',
+            messageType : 'std_msgs/String',
+            throttle_rate : 10
+        });
+
+        this.saveDataPublisher = new ROSLIB.Topic({
+            ros : this.context,
+            name : '/order_to_save',
+            messageType : 'std_msgs/Empty',
+            throttle_rate : 10
+        });
+
+        this.currentModeListener = new ROSLIB.Topic({
+            ros : this.context,
+            name : '/current_mode',
+            messageType : 'std_msgs/String',
+            throttle_rate : 1
+        });
+
+        this.cmdVelPublisher = new ROSLIB.Topic({
+            ros: this.context,
+            name: '/assisted_teleop_cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+
+        this.currentModeListener.subscribe(this.modeCallback);
+        this.changeControlPublisher.advertise();
+        this.saveDataPublisher.advertise();
+        this.cmdVelPublisher.advertise();
     }
 
     componentWillUnmount() {
@@ -383,6 +383,7 @@ class AssistanceScreen extends Component {
 }
 
 export default class Assistance extends Component {
+    static contextType = ROSContext
     constructor(props) {
         super(props);
         this.handleTimeout = this.handleTimeout.bind(this);
@@ -392,12 +393,14 @@ export default class Assistance extends Component {
             displayLoading: true,
         };
 
-        this.ros = new ROSLIB.Ros({
-            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
-        });
+        
 
+        this.timer = setTimeout(this.handleTimeout, 5000);
+    }
+
+    componentDidMount() {
         this.currentModeListener = new ROSLIB.Topic({
-            ros : this.ros,
+            ros : this.context,
             name : '/current_mode',
             messageType : 'std_msgs/String',
             throttle_rate : 1
@@ -405,10 +408,6 @@ export default class Assistance extends Component {
 
         this.currentModeListener.subscribe(this.modeCallback);
 
-        this.timer = setTimeout(this.handleTimeout, 5000);
-    }
-
-    componentDidMount() {
         //this.modeCallback("TELEOPERATION");
     }
 

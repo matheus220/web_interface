@@ -4,6 +4,7 @@ import { Map, ImageOverlay, Popup, Polyline } from "react-leaflet";
 import L from 'leaflet';
 import PolylineDecorator from "./polyline-decorator.component";
 import RotatedMarker from "./rotated-marker.component";
+import ROSContext from './ROSContext'
 
 import map from "./../WD_WA_WB.png";
 
@@ -74,7 +75,8 @@ var icons = [
 const bounds = [[-396.06, -1771.58], [2103.94, 728.42]]
 
 export default class MapWaypoints extends Component {
-
+    
+    static contextType = ROSContext
     constructor(props) {
         super(props);
         this.state = {
@@ -93,18 +95,6 @@ export default class MapWaypoints extends Component {
         this.onmouseout = this.onmouseout.bind(this);
         this.onclick = this.onclick.bind(this);
 
-        this.ros = new ROSLIB.Ros({
-            url: "ws://" + process.env.REACT_APP_ROS_MASTER_IP + ":9090"
-        });
-
-        this.poseListener = new ROSLIB.Topic({
-            ros : this.ros,
-            name : '/amcl_pose',
-            messageType : 'geometry_msgs/PoseWithCovarianceStamped',
-            throttle_rate : 1
-        });
-
-        this.poseListener.subscribe(this._pose_callback);
     }
 
     _pose_callback (msg) {
@@ -128,6 +118,17 @@ export default class MapWaypoints extends Component {
         if(typeof this.props.onMarkerClick === "function") {
             this.props.onMarkerClick(e);
         }
+    }
+
+    componentDidMount() {
+        this.poseListener = new ROSLIB.Topic({
+            ros : this.context,
+            name : '/amcl_pose',
+            messageType : 'geometry_msgs/PoseWithCovarianceStamped',
+            throttle_rate : 1
+        });
+
+        this.poseListener.subscribe(this._pose_callback);
     }
 
     componentWillReceiveProps(nextProps){
