@@ -28,7 +28,7 @@ export default  class WaypointsEdit extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/'+this.props.match.params.id)
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/waypoint/'+this.props.match.params.id)
             .then(response => {
                 this.setState({
                     name: response.data.name,
@@ -77,7 +77,7 @@ export default  class WaypointsEdit extends Component {
             group: this.state.group
         };
 
-        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/update/'+this.props.match.params.id, newWaypoint)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/waypoint/update/'+this.props.match.params.id, newWaypoint)
             .then(res => {
                 this.setState({
                     name: '',
@@ -126,7 +126,7 @@ export default  class WaypointsEdit extends Component {
                     <div className="card">
                         <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
                             <div className="col-12 col-sm-6" style={{paddingLeft: "0px"}}>
-                                <h5>Create Waypoint</h5>
+                                <h5>Update Waypoint</h5>
                             </div>
                         </div>
                         <div className="card-block">
@@ -174,7 +174,7 @@ export default  class WaypointsEdit extends Component {
 
                                 <div className="buttons-group form-group d-flex justify-content-around">
                                     <input onClick={this.onCancel} type="button" value="Cancel" className="btn btn-danger" />
-                                    <input type="submit" value="Create" className="btn btn-primary" />
+                                    <input type="submit" value="Update" className="btn btn-primary" />
                                 </div>
                             </form>
                         </div>

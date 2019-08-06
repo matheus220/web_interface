@@ -34,18 +34,20 @@ class AssistanceScreen extends Component {
     static contextType = ROSContext
     constructor(props) {
         super(props);
-
-        // this.defaultImages = [
-        //     { original: 'http://192.168.1.96:8080/stream?topic=/camera/image_raw&type=mjpeg&quality=7' },
-        //     { original: 'http://192.168.1.96:8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=7' },
-        //     { original: 'http://192.168.1.96:8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=7' }
-        // ]
-        // this.defaultCameras = ['bass_camera', 'middle_camera', 'top_camera']
-        this.defaultImages = [
-            { original: 'http://192.168.1.39:8080/stream?topic=/nav_cam/image_raw&type=mjpeg&quality=7' }
-        ]
-        this.defaultCameras = ['nav_camera']
-
+        if (process.env.REACT_APP_SERVER_SIMULATION === "true") {
+            this.defaultImages = [
+                { original: 'http://'+process.env.REACT_APP_ROS_MASTER_IP+':8080/stream?topic=/camera/image_raw&type=mjpeg&quality=7' },
+                { original: 'http://'+process.env.REACT_APP_ROS_MASTER_IP+':8080/stream?topic=/camera2/image2_raw&type=mjpeg&quality=7' },
+                { original: 'http://'+process.env.REACT_APP_ROS_MASTER_IP+':8080/stream?topic=/camera3/image3_raw&type=mjpeg&quality=7' }
+            ]
+            this.defaultCameras = ['bass_camera', 'middle_camera', 'top_camera']
+        } else {
+            this.defaultImages = [
+                { original: 'http://'+process.env.REACT_APP_ROS_MASTER_IP+':8080/stream?topic=/nav_cam/image_raw&type=mjpeg&quality=7' }
+            ]
+            this.defaultCameras = ['nav_camera']
+        }
+        
         this.state = {
             images: this.defaultImages,
             cameras: this.defaultCameras,
@@ -85,7 +87,7 @@ class AssistanceScreen extends Component {
     }
 
     fetchData() {
-        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/logmission/last/assistance')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/logmission/last/assistance')
             .then(response => {
                 if (response.data !== null) {
                     if (response.data.status === 'active') {

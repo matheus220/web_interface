@@ -23,10 +23,53 @@ import { ROSProvider } from './components/ROSContext'
 import logo from "./logo.png";
 
 const NoMatch = ({ location }) => (
-    <div>
-        <h3>No match for <code>{location.pathname}</code></h3>
+    <div className="row">
+        <div className="col-md-12 col-xl-12">
+            <div className="card d-flex justify-content-center" style={{height: "80vh"}}>
+                <div style={{margin: "auto", textAlign:"center"}}>
+                    <h2>ERROR 404</h2><br/>
+                    <h3>PAGE NOT FOUND (<code>{location.pathname}</code>)</h3>
+                </div>
+            </div>
+        </div>
     </div>
 )
+
+class ErrorBoundary extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { error: null, errorInfo: null };
+    }
+    
+    componentDidCatch(error, errorInfo) {
+        // Catch errors in any components below and re-render with error message
+        this.setState({
+            error: error,
+            errorInfo: errorInfo
+        })
+        // You can also log error messages to an error reporting service here
+    }
+    
+    render() {
+        if (this.state.errorInfo) {
+            // Error path
+            return (
+                <div className="row">
+                    <div className="col-md-12 col-xl-12">
+                        <div className="card d-flex justify-content-center" style={{height: "80vh"}}>
+                            <div style={{margin: "auto", textAlign:"center"}}>
+                                <h2>Something went wrong</h2><br/>
+                                <h3>Please refresh the page</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        // Normally, just render children
+        return this.props.children;
+    }  
+}
 
 export default class App extends Component {
     constructor(props) {
@@ -96,7 +139,7 @@ export default class App extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/mission/')
             .then(response => {
                 if(response.data.length !== this.state.missions.length) {
                     this.setState({ missions: response.data});
@@ -238,21 +281,23 @@ export default class App extends Component {
                             <div className="page-wrapper">
                                 <div className="page-body">
                                     {this.renderRedirect()}
-                                    <ROSProvider value={this.ros}>
-                                        <Switch>
-                                            <Route path="/" exact component={Navigation} />
-                                            <Route path="/waypoints" component={Waypoints} />
-                                            <Route path="/create_waypoint" component={CreateWaypoint} />
-                                            <Route path="/waypoint-edit/:id" component={WaypointEdit} />
-                                            <Route path="/missions" component={Missions} />
-                                            <Route path="/create_mission" component={CreateMission} />
-                                            <Route path="/mission-edit/:id" component={MissionEdit} />
-                                            <Route path="/schedule" component={Schedule} />
-                                            <Route path="/assistance" component={Assistance} />
-                                            <Route path="/database" component={ViewByDate} />
-                                            <Route component={NoMatch} />
-                                        </Switch>
-                                    </ROSProvider>
+                                    <ErrorBoundary>
+                                        <ROSProvider value={this.ros}>
+                                            <Switch>
+                                                <Route path="/" exact component={Navigation} />
+                                                <Route path="/waypoints" component={Waypoints} />
+                                                <Route path="/create_waypoint" component={CreateWaypoint} />
+                                                <Route path="/waypoint-edit/:id" component={WaypointEdit} />
+                                                <Route path="/missions" component={Missions} />
+                                                <Route path="/create_mission" component={CreateMission} />
+                                                <Route path="/mission-edit/:id" component={MissionEdit} />
+                                                <Route path="/schedule" component={Schedule} />
+                                                <Route path="/assistance" component={Assistance} />
+                                                <Route path="/database" component={ViewByDate} />
+                                                <Route component={NoMatch} />
+                                            </Switch>
+                                        </ROSProvider>
+                                    </ErrorBoundary>
                                 </div>
                             </div>
                         </div>

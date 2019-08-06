@@ -1,12 +1,14 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const fs = require('fs');
 const exec = require('child_process').exec;
 const later = require('later');
-const moment = require('moment')
+const moment = require('moment');
+
 const waypointRoutes = express.Router();
 const missionRoutes = express.Router();
 const logmissionRoutes = express.Router();
@@ -23,11 +25,10 @@ let LogMission = Models.LogMission;
 let Log = Models.Log;
 let Task = Models.Task;
 
-
 app.use(cors());
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/robotic', { useNewUrlParser: true });
+mongoose.connect('mongodb://127.0.0.1:27017/robotic', { useNewUrlParser: true, useCreateIndex: true });
 const connection = mongoose.connection;
 
 connection.once('open', function() {
@@ -90,7 +91,7 @@ waypointRoutes.route('/add').post(function(req, res) {
         });
 });
 
-app.use('/waypoint', waypointRoutes);
+app.use('/api/waypoint', waypointRoutes);
 
 missionRoutes.route('/').get(function(req, res) {
     Mission.find(function(err, mission) {
@@ -146,7 +147,7 @@ missionRoutes.route('/delete/:id').post(function(req, res) {
     });
 });
 
-app.use('/mission', missionRoutes);
+app.use('/api/mission', missionRoutes);
 
 logmissionRoutes.route('/').get(function(req, res) {
     LogMission.find(
@@ -214,7 +215,7 @@ logmissionRoutes.route('/date/:date').get(function(req, res) {
     .populate({ path: 'data.input', populate: { path: 'items.item' } });
 });
 
-app.use('/logmission', logmissionRoutes);
+app.use('/api/logmission', logmissionRoutes);
 
 logRoutes.route('/').get(function(req, res) {
     Log.find(
@@ -229,7 +230,7 @@ logRoutes.route('/').get(function(req, res) {
     .limit(10);
 });
 
-app.use('/log', logRoutes);
+app.use('/api/log', logRoutes);
 
 function createRosPubCommand(task_id, cron_expression, mission_id) {
     return("# " + task_id + "\n" + cron_expression  + " source /opt/ros/kinetic/setup.bash && rostopic pub -1 /change_mode std_msgs/String \"data: '{\\\"timestamp\\\": \\\"$(date +\"\\%d\\%m\\%Y\\%H\\%M\\%S\\%3N\")\\\", \\\"mode\\\": \\\"scheduled_patrol\\\", \\\"scheduled\\\": \\\"true\\\", \\\"mission_id\\\": \\\"" + mission_id + "\\\"}'\"\n");
@@ -342,7 +343,15 @@ scheduleRoutes.route('/delete/:id').post(function(req, res) {
     });
 });
 
-app.use('/task', scheduleRoutes);
+app.use('/api/task', scheduleRoutes);
+
+// Serve the static files from the React app
+app.use(express.static(path.join(__dirname, './../build')));
+
+// Handles any requests that don't match the ones above
+app.get('*', (req,res) =>{
+    res.sendFile(path.join(__dirname+'./../build/index.html'));
+});
 
 app.listen(PORT, function() {
     console.log("Server is running on Port: " + PORT);

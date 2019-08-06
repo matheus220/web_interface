@@ -60,7 +60,7 @@ export default  class CreateWaypoints extends Component {
             group: this.state.group
         };
 
-        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/add', newWaypoint)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/waypoint/add', newWaypoint)
             .then(res => {
                 this.setState({
                     name: '',

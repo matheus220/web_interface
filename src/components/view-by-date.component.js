@@ -69,7 +69,7 @@ export default class ViewByDate extends Component {
 
     fetchLogMissions() {
         var date = Moment(this.state.date);
-        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/logmission/date/'+date.format("YYYY-MM-DD"))
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/logmission/date/'+date.format("YYYY-MM-DD"))
             .then(response => {
                 var start = Moment(date.startOf('day').toDate());
                 var end = Moment(date.endOf('day').toDate());
@@ -166,7 +166,6 @@ export default class ViewByDate extends Component {
                     } else {
                         waypoint.icon = 2;
                     }
-                    console.log('Wp', waypoint)
                     return(waypoint);
                 })
             }
@@ -209,7 +208,6 @@ export default class ViewByDate extends Component {
     }
 
     logMissionsList(logmissions) {
-        console.log(logmissions)
         return logmissions.map(logmission => {
             return({
                 id: logmission._id,

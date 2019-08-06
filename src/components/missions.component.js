@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { Scrollbars } from 'react-custom-scrollbars';
 import axios from 'axios';
@@ -27,7 +27,7 @@ export default class Missions extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/mission/')
             .then(response => {
                 this.setState({ missions: response.data });
             })
@@ -37,7 +37,7 @@ export default class Missions extends Component {
     }
 
     componentDidUpdate() {
-        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/mission/')
             .then(response => {
                 if (this.state.missions.length !== response.data.length) {
                     this.setState({ missions: response.data });
@@ -49,7 +49,7 @@ export default class Missions extends Component {
     }
 
     deleteItem(id) {
-        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/delete/' + id)
+        axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/mission/delete/' + id)
             .then(response => {
                 this.setState({
                     missions: this.state.missions.filter(mission => mission._id !== id)

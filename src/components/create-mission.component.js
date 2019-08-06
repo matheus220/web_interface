@@ -33,7 +33,7 @@ export default class CreateMission extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':4000/waypoint/')
+        axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/waypoint/')
             .then(response => {
                 let suggestions = response.data.map(
                     (waypoint) => {
@@ -105,7 +105,7 @@ export default class CreateMission extends Component {
                 path: path
             };
     
-            axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':4000/mission/add', newMission)
+            axios.post('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/mission/add', newMission)
                 .then(res => {
                     this.setState({
                         name: '',
