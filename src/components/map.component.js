@@ -72,12 +72,18 @@ var icons = [
     robotPoseIcon2
 ]
 
-// const size = [2500, 2500] // Width, Height
-// const origin = [-88.579, -19.803, 0.0]
-// const resolution = 0.05
-const size = [550, 350] // Width, Height
-const origin = [-11.0, -7.5, 0.0]
-const resolution = 0.05
+let size = null;
+let origin = null;
+let resolution = null;
+if (process.env.REACT_APP_MAP === "WD_WA_WB") {
+    size = [2500, 2500] // Width, Height
+    origin = [-88.579, -19.803, 0.0]
+    resolution = 0.05
+} else if (process.env.REACT_APP_MAP === "datacenter_simulation") {
+    size = [550, 350] // Width, Height
+    origin = [-11.0, -7.5, 0.0]
+    resolution = 0.05
+}
 const bounds = [[origin[1]/resolution, origin[0]/resolution], [size[1]+origin[1]/resolution, size[0]+origin[0]/resolution]]
 
 export default class MapWaypoints extends Component {
