@@ -1,6 +1,25 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+let User = new Schema({
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
+    date: {
+      type: Date,
+      default: Date.now
+    }
+});
+
 let Waypoint = new Schema({
     name: {
         type: String,
@@ -150,3 +169,4 @@ module.exports.Input = mongoose.model('Input', Input);
 module.exports.Camera = mongoose.model('Camera', Camera);
 module.exports.Robot = mongoose.model('Robot', Robot);
 module.exports.Task = mongoose.model('Task', Task);
+module.exports.User = mongoose.model('User', User);

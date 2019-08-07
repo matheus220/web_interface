@@ -17,8 +17,10 @@ import Assistance from "./components/assistance.component";
 import ViewByDate from "./components/view-by-date.component";
 import MissionEdit from "./components/mission-edit.component";
 import WaypointEdit from "./components/waypoint-edit.component";
+import Login from "./components/login.component";
 
 import { ROSProvider } from './components/ROSContext'
+import {useUser} from './context/auth'
 
 import logo from "./logo.png";
 
@@ -71,7 +73,7 @@ class ErrorBoundary extends Component {
     }  
 }
 
-export default class App extends Component {
+class AuthenticatedApp extends Component {
     constructor(props) {
         super(props);
 
@@ -294,6 +296,7 @@ export default class App extends Component {
                                                 <Route path="/schedule" component={Schedule} />
                                                 <Route path="/assistance" component={Assistance} />
                                                 <Route path="/database" component={ViewByDate} />
+                                                <Route path="/login" component={Login} />
                                                 <Route component={NoMatch} />
                                             </Switch>
                                         </ROSProvider>
@@ -306,4 +309,9 @@ export default class App extends Component {
             </Router>
         );
     }
+}
+
+function App() {
+    const user = useUser()
+    return user ? <AuthenticatedApp /> : <Login />
 }
