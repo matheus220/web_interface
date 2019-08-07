@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-
+import ReactLoading from 'react-loading';
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
@@ -11,8 +11,9 @@ import store from "./store";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import Login from "./components/login.component";
-import AuthenticatedApp from "./components/authenticated-app.component";
+const loadAuthenticatedApp = () => import('./components/authenticated-app.component')
+const AuthenticatedApp = React.lazy(loadAuthenticatedApp)
+const UnauthenticatedApp = React.lazy(() => import('./components/login.component'))
 
 // Check for token to keep user logged in
 if (localStorage.jwtToken) {
@@ -34,11 +35,16 @@ if (localStorage.jwtToken) {
     }
 }
 
-class App extends Component {
-    render() {
-        const { isAuthenticated } = this.props.auth;
-        return isAuthenticated ? <AuthenticatedApp /> : <Login />
-    }
+function App(props) {
+  const { isAuthenticated } = props.auth;
+  React.useEffect(() => {
+    loadAuthenticatedApp()
+  }, [])
+  return (
+    <React.Suspense fallback={<ReactLoading type="spinningBubbles" color="#343A40" height={'80px'} width={'80px'} />}>
+      {isAuthenticated ? <AuthenticatedApp /> : <UnauthenticatedApp />}
+    </React.Suspense>
+  )
 }
 
 App.propTypes = {
