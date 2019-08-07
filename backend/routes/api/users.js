@@ -4,6 +4,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
+const auth = require('../../middleware/auth');
 
 // Load input validation
 const validateRegisterInput = require("../../validation/register");
@@ -16,7 +17,7 @@ var User = Models.User;
 // @route POST api/users/register
 // @desc Register user
 // @access Public
-router.post("/register", (req, res) => {
+router.post("/register", auth, (req, res) => {
     // Form validation
     const { errors, isValid } = validateRegisterInput(req.body);
     // Check validation
@@ -80,7 +81,7 @@ router.post("/login", (req, res) => {
                     payload,
                     keys.secretOrKey,
                     {
-                        expiresIn: 31556926 // 1 year in seconds
+                        expiresIn: 86400 // 1 year in seconds
                     },
                     (err, token) => {
                         res.json({
