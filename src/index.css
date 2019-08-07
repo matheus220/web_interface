@@ -523,3 +523,7 @@ code {
   border-color: darkblue!important;
   background-color: lightblue!important;
 }
+
+.red-text {
+  color: red;
+}

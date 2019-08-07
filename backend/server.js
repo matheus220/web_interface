@@ -4,349 +4,45 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const fs = require('fs');
-const exec = require('child_process').exec;
-const later = require('later');
-const moment = require('moment');
 
-const waypointRoutes = express.Router();
-const missionRoutes = express.Router();
-const logmissionRoutes = express.Router();
-const logRoutes = express.Router();
-const scheduleRoutes = express.Router();
-
-later.date.localTime();
-let filePath = "/tmp/crontabFile.txt";
-let Models = require('./mongo.model');
-let Waypoint = Models.Waypoint;
-let Mission = Models.Mission;
-let LogMission = Models.LogMission;
-let Log = Models.Log;
-let Task = Models.Task;
+const users = require("./routes/api/users");
+const waypoints = require("./routes/api/waypoints");
+const missions = require("./routes/api/missions");
+const logmissions = require("./routes/api/logmissions");
+const logs = require("./routes/api/logs");
+const tasks = require("./routes/api/tasks");
 
 app.use(cors());
+
+app.use(
+    bodyParser.urlencoded({
+        extended: false
+    })
+);
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/robotic', { useNewUrlParser: true, useCreateIndex: true });
-const connection = mongoose.connection;
+// DB Config
+const db = require("./config/keys").mongoURI;
 
-connection.once('open', function() {
-    console.log("MongoDB database connection established successfully");
-})
+// Connect to Mongo
+mongoose
+  .connect(db, { 
+    useNewUrlParser: true,
+    useCreateIndex: true
+  }) // Adding new mongo url parser
+  .then(() => console.log('MongoDB Connected...'))
+  .catch(err => console.log(err));
 
-waypointRoutes.route('/').get(function(req, res) {
-    Waypoint.find(function(err, waypoints) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(waypoints);
-        }
-    });
-});
-
-waypointRoutes.route('/:id').get(function(req, res) {
-    let id = req.params.id;
-    Waypoint.findById(id, function(err, wp) {
-        res.json(wp);
-    });
-});
-
-waypointRoutes.route('/delete/:id').post(function(req, res) {
-    Waypoint.findByIdAndRemove(req.params.id, function(err) {
-        if (err)
-            res.send(err);
-        else
-            res.json({ message: 'Waypoint Deleted!'});
-    });
-});
-
-waypointRoutes.route('/update/:id').post(function(req, res) {
-    Waypoint.findById(req.params.id, function(err, waypoint) {
-        if (!waypoint)
-            res.status(404).send("Waypoint is not found");
-        else
-            waypoint.name = req.body.name;
-            waypoint.point = req.body.point;
-            waypoint.map = req.body.map;
-            waypoint.group = req.body.group;
-
-            waypoint.save().then(wp => {
-                res.json('Waypoint updated!');
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            });
-    });
-});
-
-waypointRoutes.route('/add').post(function(req, res) {
-    let waypoint = new Waypoint(req.body);
-    waypoint.save()
-        .then(todo => {
-            res.status(200).json({'waypoint': 'waypoint added successfully'});
-        })
-        .catch(err => {
-            res.status(400).send('adding new waypoint failed');
-        });
-});
-
-app.use('/api/waypoint', waypointRoutes);
-
-missionRoutes.route('/').get(function(req, res) {
-    Mission.find(function(err, mission) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(mission);
-        }
-    }).populate('path');
-});
-
-missionRoutes.route('/:id').get(function(req, res) {
-    let id = req.params.id;
-    Mission.findById(id, function(err, todo) {
-        res.json(todo);
-    });
-});
-
-missionRoutes.route('/update/:id').post(function(req, res) {
-    Mission.findById(req.params.id, function(err, mission) {
-        if (!mission)
-            res.status(404).send("mission is not found");
-        else
-            mission.name = req.body.name;
-            mission.path = req.body.path;
-
-            mission.save().then(m => {
-                res.json('Mission updated!');
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            });
-    });
-});
-
-missionRoutes.route('/add').post(function(req, res) {
-    let mission = new Mission(req.body);
-    mission.save()
-        .then(mission => {
-            res.status(200).json({'mission': 'mission added successfully'});
-        })
-        .catch(err => {
-            res.status(400).send('adding new mission failed');
-        });
-});
-
-missionRoutes.route('/delete/:id').post(function(req, res) {
-    Mission.findByIdAndRemove(req.params.id, function(err) {
-        if (err)
-            res.send(err);
-        else
-            res.json({ message: 'Mission Deleted!'});
-    });
-});
-
-app.use('/api/mission', missionRoutes);
-
-logmissionRoutes.route('/').get(function(req, res) {
-    LogMission.find(
-        function(err, logmission) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(logmission);
-        }
-    })
-    .sort('-start_time')
-    .populate({ path: 'mission_id', populate: { path: 'path' } })
-    .populate('data.waypoint')
-    .populate({ path: 'data.input', populate: { path: 'items.item' } });
-});
-
-logmissionRoutes.route('/last/:mode').get(function(req, res) {
-    LogMission.findOne(
-        { mode: req.params.mode },
-        function(err, logmission) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(logmission);
-        }
-    })
-    .sort('-start_time')
-    .populate({ path: 'mission_id', populate: { path: 'path' } })
-    .populate('data.waypoint')
-    .populate({ path: 'data.input', populate: { path: 'items.item' } });
-});
-
-logmissionRoutes.route('/date/:date').get(function(req, res) {
-    var date = moment(moment.utc(req.params.date), "YYYY-MM-DD");
-    var start = date.startOf('day').toDate();
-    var end = date.endOf('day').toDate();
-    LogMission.find({
-        $and: [
-            {
-                mode: { $in: ['patrol', 'assistance'] }
-            },
-            {
-                start_time: { $exists: true }
-            },
-            {
-                end_time: { $exists: true }
-            },
-            {
-                $or: [
-                    { end_time: { $gte: start, $lte: end } },
-                    { start_time: { $gte: start, $lte: end } }
-                ]
-            }
-        ]},
-        function(err, logmission) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(logmission);
-        }
-    })
-    .sort('-start_time')
-    .populate({ path: 'mission_id', populate: { path: 'path' } })
-    .populate('data.waypoint')
-    .populate({ path: 'data.input', populate: { path: 'items.item' } });
-});
-
-app.use('/api/logmission', logmissionRoutes);
-
-logRoutes.route('/').get(function(req, res) {
-    Log.find(
-        function(err, log) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(log);
-            }
-        }
-    ).sort({ date: 'descending' })
-    .limit(10);
-});
-
-app.use('/api/log', logRoutes);
-
-function createRosPubCommand(task_id, cron_expression, mission_id) {
-    return("# " + task_id + "\n" + cron_expression  + " source /opt/ros/kinetic/setup.bash && rostopic pub -1 /change_mode std_msgs/String \"data: '{\\\"timestamp\\\": \\\"$(date +\"\\%d\\%m\\%Y\\%H\\%M\\%S\\%3N\")\\\", \\\"mode\\\": \\\"scheduled_patrol\\\", \\\"scheduled\\\": \\\"true\\\", \\\"mission_id\\\": \\\"" + mission_id + "\\\"}'\"\n");
-}
-
-function updateFile(){
-    Task.find({'active': true},
-        function(err, tasks) {
-            if (err) {
-                console.log(err);
-            } else {
-                let message = "########## DO NOT WRITE BELOW THIS LINE ##########";
-                let setup = [message + "\n\nSHELL=/bin/bash\n"];
-                let taskList = tasks.map(task => {
-                    return (createRosPubCommand(task._id, task.cron_expression, task.mission_id));
-                });
-                let toWrite = setup.concat(taskList);
-
-                exec("crontab -l > /tmp/crontab_tmp_copy.txt", function(err, stdout, stderr) {
-                    if (err) exec("touch /tmp/crontab_tmp_copy.txt");
-                    fs.readFile('/tmp/crontab_tmp_copy.txt', {encoding: 'utf-8'}, function(err, data) {
-                        if (err) throw error;
-                    
-                        let dataArray = data.split('\n'); // convert file data in an array
-                        const searchLine = message; // we are looking for a line, contains, key word 'user1' in the file
-                        let index = dataArray.indexOf(searchLine);
-        
-                        if(index !== -1) {
-                            dataArray.splice(index);
-                        }
-    
-                        const updatedData = dataArray.concat(toWrite);
-                        
-                        fs.writeFile(filePath, updatedData.join("\n"), (err) => {
-                            if (err) throw err;
-                            console.log ('Successfully updated the file data');
-                        });
-    
-                        exec("crontab " + filePath, function(err, stdout, stderr) {
-                            if (err) throw err;
-                            console.log('Crontab updated!');
-                        });
-                    
-                    });
-                });
-            }
-        }
-    ).sort({ date: 'descending' });
-}
-
-scheduleRoutes.route('/').get(function(req, res) {
-    Task.find().sort({ date: 'descending' }).lean().exec(
-        function(err, tasks) {
-            if (err) {
-                console.log(err);
-            } else {
-                var t = tasks.map(task => {
-                    var cron = later.parse.cron(task.cron_expression);
-                    task['next'] = later.schedule(cron).next(1);
-                    task['last'] = later.schedule(cron).prev(1);
-                    return(task);
-                });
-                res.json(t);
-            }
-        }
-    );
-});
-
-scheduleRoutes.route('/add').post(function(req, res) {
-    let task = new Task(req.body);
-    task.save()
-        .then(t => {
-            res.status(200).json({'task': 'task added successfully'});
-            updateFile();
-        })
-        .catch(err => {
-            res.status(400).send('adding new task failed');
-        });
-});
-
-scheduleRoutes.route('/update/:id').post(function(req, res) {
-    Task.findById(req.params.id, function(err, task) {
-        if (!task)
-            res.status(404).send("data is not found");
-        else
-            task.mission_id = req.body.mission_id;
-            task.mission_name = req.body.mission_name;
-            task.cron_expression = req.body.cron_expression;
-            task.date = req.body.date;
-            task.active = req.body.active;
-
-            task.save().then(t => {
-                res.json('Task updated!');
-                updateFile();
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            });
-    });
-});
-
-scheduleRoutes.route('/delete/:id').post(function(req, res) {
-    Task.findByIdAndRemove(req.params.id, function(err) {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json({ message: 'Task Deleted!'});
-            updateFile();
-        }
-    });
-});
-
-app.use('/api/task', scheduleRoutes);
+// Routes
+app.use("/api/users", users);
+app.use('/api/waypoint', waypoints);
+app.use('/api/mission', missions);
+app.use('/api/logmission', logmissions);
+app.use('/api/log', logs);
+app.use('/api/task', tasks);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === 'production') {
-    console.log("Server running in PRODUCTION mode");
     // Set static folder
     app.use(express.static(path.join(__dirname, './../build')));
 
@@ -358,5 +54,5 @@ if (process.env.NODE_ENV === 'production') {
 const port = process.env.PORT || 4000;
 
 app.listen(port, function() {
-    console.log("Server is running on Port: " + port);
+    console.log("Server started on port: " + port);
 });
