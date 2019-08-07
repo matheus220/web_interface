@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import ReactLoading from 'react-loading';
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
