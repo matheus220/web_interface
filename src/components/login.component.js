@@ -6,131 +6,123 @@ import { loginUser } from "../actions/authActions";
 import classnames from "classnames";
 
 class Login extends Component {
-  constructor() {
-    super();
-    this.state = {
-      email: "",
-      password: "",
-      errors: {}
-    };
-  }
-
-  componentDidMount() {
-    // If logged in and user navigates to Login page, should redirect them to dashboard
-    if (this.props.auth.isAuthenticated) {
-      this.props.history.push("/");
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.auth.isAuthenticated) {
-      this.props.history.push("/");
+    constructor() {
+        super();
+        this.state = {
+            email: "",
+            password: "",
+            errors: {}
+        };
     }
 
-    if (nextProps.errors) {
-      this.setState({
-        errors: nextProps.errors
-      });
+    componentDidMount() {
+        // If logged in and user navigates to Login page, should redirect them to dashboard
+        if (this.props.auth.isAuthenticated) {
+            this.props.history.push("/");
+        }
     }
-  }
 
-  onChange = e => {
-    this.setState({ [e.target.id]: e.target.value });
-  };
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.auth.isAuthenticated) {
+            this.props.history.push("/");
+        }
 
-  onSubmit = e => {
-    e.preventDefault();
-    console.log("entrou");
+        if (nextProps.errors) {
+            this.setState({
+                errors: nextProps.errors
+            });
+        }
+    }
 
-    const userData = {
-      email: this.state.email,
-      password: this.state.password
+    onChange = e => {
+        this.setState({ [e.target.id]: e.target.value });
     };
 
-    this.props.loginUser(userData);
-  };
+    onSubmit = e => {
+        e.preventDefault();
 
-  render() {
-    const { errors } = this.state;
+        const userData = {
+            email: this.state.email,
+            password: this.state.password
+        };
 
-    return (
-      <div className="container">
-        <div style={{ marginTop: "4rem" }} className="row">
-          <div className="col s8 offset-s2">
-            <div className="col s12" style={{ paddingLeft: "11.250px" }}>
-              <h4>
-                <b>Login</b>
-              </h4>
+        this.props.loginUser(userData);
+    };
+
+    render() {
+        const { errors } = this.state;
+
+        return (
+            <div class="container" style={{height: "100vh"}}>
+                <div class="row justify-content-center align-items-center h-100">
+                    <div class="col col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                        <div className="card" style={{padding: "40px"}}>
+                            <div className="card-header">
+                                <h4><b>Login</b></h4>
+                            </div>
+                            <div className="card-block">
+                                <form noValidate onSubmit={this.onSubmit}>
+                                    <div className="form-group">
+                                        <input
+                                            onChange={this.onChange}
+                                            value={this.state.email}
+                                            error={errors.email}
+                                            id="email"
+                                            type="email"
+                                            placeholder="Username"
+                                            className={classnames("form-control form-control", {
+                                                invalid: errors.email || errors.emailnotfound
+                                            })}
+                                        />
+                                        <span className="red-text">
+                                            {errors.email}
+                                            {errors.emailnotfound}
+                                        </span>
+                                    </div>
+                                    <div className="form-group">
+                                        <input
+                                            onChange={this.onChange}
+                                            value={this.state.password}
+                                            error={errors.password}
+                                            id="password"
+                                            type="password"
+                                            placeholder="Password"
+                                            className={classnames("form-control form-control", {
+                                                invalid: errors.password || errors.passwordincorrect
+                                            })}
+                                        />
+                                        <span className="red-text">
+                                            {errors.password}
+                                            {errors.passwordincorrect}
+                                        </span>
+                                    </div>
+                                    <div className="form-group" style={{marginTop: "30px"}}>
+                                        <button type="submit" className="btn btn-info btn-lg btn-block">
+                                            SIGN IN
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form noValidate onSubmit={this.onSubmit}>
-              <div className="input-field col s12">
-                <input
-                  onChange={this.onChange}
-                  value={this.state.email}
-                  error={errors.email}
-                  id="email"
-                  type="email"
-                  className={classnames("", {
-                    invalid: errors.email || errors.emailnotfound
-                  })}
-                />
-                <label htmlFor="email">Email</label>
-                <span className="red-text">
-                  {errors.email}
-                  {errors.emailnotfound}
-                </span>
-              </div>
-              <div className="input-field col s12">
-                <input
-                  onChange={this.onChange}
-                  value={this.state.password}
-                  error={errors.password}
-                  id="password"
-                  type="password"
-                  className={classnames("", {
-                    invalid: errors.password || errors.passwordincorrect
-                  })}
-                />
-                <label htmlFor="password">Password</label>
-                <span className="red-text">
-                  {errors.password}
-                  {errors.passwordincorrect}
-                </span>
-              </div>
-              <div className="col s12" style={{ paddingLeft: "11.250px" }}>
-                <button
-                  style={{
-                    width: "150px",
-                    borderRadius: "3px",
-                    letterSpacing: "1.5px",
-                    marginTop: "1rem"
-                  }}
-                  type="submit"
-                  className="btn btn-large waves-effect waves-light hoverable blue accent-3"
-                >
-                  Login
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
+        );
+    }
 }
 
 Login.propTypes = {
-  loginUser: PropTypes.func.isRequired,
-  auth: PropTypes.object.isRequired,
-  errors: PropTypes.object.isRequired
+    loginUser: PropTypes.func.isRequired,
+    auth: PropTypes.object.isRequired,
+    errors: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => ({
-  auth: state.auth,
-  errors: state.errors
+    auth: state.auth,
+    errors: state.errors
 });
 
 export default connect(
-  mapStateToProps,
-  { loginUser }
+    mapStateToProps,
+    { loginUser }
 )(Login);
