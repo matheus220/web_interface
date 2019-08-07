@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "set NODE_ENV=production&&set HTTPS=true&&node server"
+    "server": "set NODE_ENV=production&&node server"
   },
   "keywords": [],
   "author": "",

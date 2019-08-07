@@ -15,6 +15,15 @@ const loadAuthenticatedApp = () => import('./components/authenticated-app.compon
 const AuthenticatedApp = React.lazy(loadAuthenticatedApp)
 const UnauthenticatedApp = React.lazy(() => import('./components/login.component'))
 
+export function FullPageSpinner() {
+  return (
+    <div style={{margin: 'auto'}}>
+      <ReactLoading type="spinningBubbles" color="#343A40" height={'80px'} width={'80px'} />
+    </div>
+  )
+}
+
+
 // Check for token to keep user logged in
 if (localStorage.jwtToken) {
     // Set auth token header auth
@@ -41,7 +50,7 @@ function App(props) {
     loadAuthenticatedApp()
   }, [])
   return (
-    <React.Suspense fallback={<ReactLoading type="spinningBubbles" color="#343A40" height={'80px'} width={'80px'} />}>
+    <React.Suspense fallback={<FullPageSpinner/>}>
       {isAuthenticated ? <AuthenticatedApp /> : <UnauthenticatedApp />}
     </React.Suspense>
   )
