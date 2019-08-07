@@ -6,7 +6,7 @@ import PolylineDecorator from "./polyline-decorator.component";
 import RotatedMarker from "./rotated-marker.component";
 import ROSContext from './ROSContext'
 
-import map from "./../WD_WA_WB.png";
+const map = require("./../"+process.env.REACT_APP_MAP+".png");
 
 const rosQuaternionToGlobalTheta = function(orientation) {
     // convert to radians
@@ -72,7 +72,13 @@ var icons = [
     robotPoseIcon2
 ]
 
-const bounds = [[-396.06, -1771.58], [2103.94, 728.42]]
+// const size = [2500, 2500] // Width, Height
+// const origin = [-88.579, -19.803, 0.0]
+// const resolution = 0.05
+const size = [550, 350] // Width, Height
+const origin = [-11.0, -7.5, 0.0]
+const resolution = 0.05
+const bounds = [[origin[1]/resolution, origin[0]/resolution], [size[1]+origin[1]/resolution, size[0]+origin[0]/resolution]]
 
 export default class MapWaypoints extends Component {
     
