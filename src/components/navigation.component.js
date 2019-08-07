@@ -61,7 +61,7 @@ export default class Navigation extends Component {
     fetchData() {
         axios.get('http://'+process.env.REACT_APP_SERVER_PATH+':'+process.env.REACT_APP_SERVER_PORT+'/api/logmission/last/patrol')
             .then(response => {
-                if (response.data !== this.state.logmission) {
+                if (response.data !== this.state.logmission && response.data.hasOwnProperty("mission_id")) {
                     let mission_waypoints = response.data.mission_id.path;
                     let traveled_waypoints = response.data.data;
                     mission_waypoints.map(waypoint => {

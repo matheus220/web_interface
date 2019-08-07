@@ -213,7 +213,6 @@ class AuthenticatedApp extends Component {
     
     render() {
         var on_assistance = this.state.currentMode === 'TELEOPERATION';
-        const { isAuthenticated } = this.props.auth;
         return (
             <Router>
                 <div className="pcoded-wrapper">

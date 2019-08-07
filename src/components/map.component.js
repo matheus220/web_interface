@@ -6,7 +6,7 @@ import PolylineDecorator from "./polyline-decorator.component";
 import RotatedMarker from "./rotated-marker.component";
 import ROSContext from './ROSContext'
 
-const map = require("./../"+process.env.REACT_APP_MAP+".png");
+const map = require("./../images/"+process.env.REACT_APP_MAP+".png");
 
 const rosQuaternionToGlobalTheta = function(orientation) {
     // convert to radians
@@ -40,33 +40,33 @@ var LeafIcon = L.Icon.extend({
 });
 
 var robotPoseIcon = new LeafIcon({
-    iconUrl: require('./../navigation.png'),
+    iconUrl: require('./../images/navigation.png'),
     iconSize:     [34, 34],
     iconAnchor:   [17, 17],
     popupAnchor:  [0, -20]
 });
 
 var robotPoseIcon1 = new LeafIcon({
-    iconUrl: require('./../navigation1.png'),
+    iconUrl: require('./../images/navigation1.png'),
     iconSize:     [34, 34],
     iconAnchor:   [17, 17],
     popupAnchor:  [0, -20]
 });
 
 var robotPoseIcon2 = new LeafIcon({
-    iconUrl: require('./../navigation2.png'),
+    iconUrl: require('./../images/navigation2.png'),
     iconSize:     [34, 34],
     iconAnchor:   [17, 17],
     popupAnchor:  [0, -20]
 });
 
 var icons = [
-    new LeafIcon({iconUrl: require('./../blue.png')}),
-    new LeafIcon({iconUrl: require('./../green.png')}), 
-    new LeafIcon({iconUrl: require('./../red.png')}),
-    new LeafIcon({iconUrl: require('./../orange.png')}),
-    new LeafIcon({iconUrl: require('./../purple.png')}),
-    new LeafIcon({iconUrl: require('./../grey.png')}),
+    new LeafIcon({iconUrl: require('./../images/blue.png')}),
+    new LeafIcon({iconUrl: require('./../images/green.png')}), 
+    new LeafIcon({iconUrl: require('./../images/red.png')}),
+    new LeafIcon({iconUrl: require('./../images/orange.png')}),
+    new LeafIcon({iconUrl: require('./../images/purple.png')}),
+    new LeafIcon({iconUrl: require('./../images/grey.png')}),
     robotPoseIcon,
     robotPoseIcon1,
     robotPoseIcon2
