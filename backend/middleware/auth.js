@@ -18,7 +18,6 @@ function auth(req, res, next) {
         const decoded = jwt.verify(token, keys.secretOrKey);
         // Add user from payload
         req.user = decoded;
-        console.log("passou")
         next();
     } catch (e) {
         res.status(400).json({ msg: 'Token is not valid' });

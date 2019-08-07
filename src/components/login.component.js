@@ -9,7 +9,7 @@ class Login extends Component {
     constructor() {
         super();
         this.state = {
-            email: "",
+            username: "",
             password: "",
             errors: {}
         };
@@ -42,7 +42,7 @@ class Login extends Component {
         e.preventDefault();
 
         const userData = {
-            email: this.state.email,
+            username: this.state.username,
             password: this.state.password
         };
 
@@ -53,9 +53,9 @@ class Login extends Component {
         const { errors } = this.state;
 
         return (
-            <div class="container" style={{height: "100vh"}}>
-                <div class="row justify-content-center align-items-center h-100">
-                    <div class="col col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div className="container" style={{height: "100vh"}}>
+                <div className="row justify-content-center align-items-center h-100">
+                    <div className="col col-sm-10 col-md-8 col-lg-6 col-xl-5">
                         <div className="card" style={{padding: "40px"}}>
                             <div className="card-header">
                                 <h4><b>Login</b></h4>
@@ -67,16 +67,16 @@ class Login extends Component {
                                             onChange={this.onChange}
                                             value={this.state.email}
                                             error={errors.email}
-                                            id="email"
-                                            type="email"
+                                            id="username"
+                                            type="text"
                                             placeholder="Username"
                                             className={classnames("form-control form-control", {
-                                                invalid: errors.email || errors.emailnotfound
+                                                invalid: errors.username || errors.usernamenotfound
                                             })}
                                         />
                                         <span className="red-text">
-                                            {errors.email}
-                                            {errors.emailnotfound}
+                                            {errors.username}
+                                            {errors.usernamenotfound}
                                         </span>
                                     </div>
                                     <div className="form-group">
