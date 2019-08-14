@@ -43,6 +43,7 @@ app.use('/api/task', tasks);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === 'production') {
+    console.log("Server started in PRODUCTION mode")
     // Set static folder
     app.use(express.static(path.join(__dirname, './../build')));
 

@@ -3,8 +3,6 @@ import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import MapWaypoints from "./map.component";
 
-const mapName = "WD_WA_WB"
-
 export default  class CreateWaypoints extends Component {
 
     constructor(props) {
@@ -20,7 +18,7 @@ export default  class CreateWaypoints extends Component {
             _id: 0,
             name: '',
             point: [0.0, 0.0, 0.0],
-            map: mapName,
+            map: process.env.REACT_APP_MAP,
             group: '',
             icon: 0
         }
@@ -65,7 +63,6 @@ export default  class CreateWaypoints extends Component {
                 this.setState({
                     name: '',
                     point: [],
-                    map: mapName,
                     group: ''
                 })
                 
@@ -82,7 +79,6 @@ export default  class CreateWaypoints extends Component {
         this.setState({
             name: '',
             point: [],
-            map: mapName,
             group: ''
         })
 
@@ -124,6 +120,16 @@ export default  class CreateWaypoints extends Component {
                                             />
                                 </div>
                                 <div className="form-group">
+                                    <label>Group: </label>
+                                    <input 
+                                            type="text" 
+                                            className="form-control"
+                                            value={this.state.group}
+                                            onChange={this.onChangeWaypointGroup}
+                                            required
+                                            />
+                                </div>
+                                <div className="form-group">
                                     <label>Point: </label>
                                     <input 
                                             type="text" 
@@ -142,19 +148,9 @@ export default  class CreateWaypoints extends Component {
                                             value={this.state.map}
                                             onChange={this.onChangeWaypointMap}
                                             required
+                                            disabled
                                             />
                                 </div>
-                                <div className="form-group">
-                                    <label>Group: </label>
-                                    <input 
-                                            type="text" 
-                                            className="form-control"
-                                            value={this.state.group}
-                                            onChange={this.onChangeWaypointGroup}
-                                            required
-                                            />
-                                </div>
-
                                 <div className="buttons-group form-group d-flex justify-content-around">
                                     <input onClick={this.onCancel} type="button" value="Cancel" className="btn btn-danger" />
                                     <input type="submit" value="Create" className="btn btn-primary" />

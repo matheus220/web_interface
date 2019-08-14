@@ -26,7 +26,7 @@ export default class ViewByDate extends Component {
             stack: false,
             orientation: "top",
             showMajorLabels: false,
-            showCurrentTime: true,
+            showCurrentTime: false,
             zoomMin: 900000,
             zoomMax: 90000000,
             max: Moment(today.endOf('day')),

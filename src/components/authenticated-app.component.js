@@ -295,6 +295,7 @@ class AuthenticatedApp extends Component {
                                     <ErrorBoundary>
                                         <ROSProvider value={this.ros}>
                                             <Switch>
+                                                <Route path="/login" exact render={() => (<Redirect to="/" />)} />
                                                 <Route path="/" exact component={Navigation} />
                                                 <Route path="/waypoints" component={Waypoints} />
                                                 <Route path="/create_waypoint" component={CreateWaypoint} />
